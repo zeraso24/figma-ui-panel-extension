@@ -1,0 +1,6 @@
+{
+  "name": "cursor-visual-patch-plugin",
+  "version": "0.1.0",
+  "main": "src/extension.ts",
+  "dependencies": {}
+} 

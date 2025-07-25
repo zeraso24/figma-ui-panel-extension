@@ -1,0 +1,12 @@
+{
+  "name": "Visual Patch Plugin",
+  "version": "0.1.0",
+  "description": "Apply visual patch instructions directly in Cursor IDE.",
+  "main": "src/extension.ts",
+  "commands": [
+    {
+      "id": "applyVisualPatch",
+      "title": "Apply Visual Patch"
+    }
+  ]
+} 
