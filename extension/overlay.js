@@ -157,6 +157,8 @@ Note: This is a fallback instruction. Check the console for detailed change info
   }
 };
 
+// Load ColorPicker first
+import './colorPicker.js';
 import { renderFigmaPanelUI } from './figmaPanelUI.js';
 
 export function start({ onEdit, onCommit }) {
@@ -205,8 +207,9 @@ export function start({ onEdit, onCommit }) {
 
   // Hover effect logic with live console updates
   document.addEventListener('mouseover', (e) => {
-    if (e.target.closest('#figma-sidebar')) {
-      return; // Don't hover elements when over our UI
+    // Don't hover elements when over our UI or color picker
+    if (e.target.closest('#figma-sidebar') || e.target.closest('.color-picker-popup')) {
+      return;
     }
     
     // Remove previous hover effect
@@ -248,7 +251,7 @@ export function start({ onEdit, onCommit }) {
   });
 
   document.addEventListener('mouseout', (e) => {
-    if (e.target.closest('#figma-sidebar')) {
+    if (e.target.closest('#figma-sidebar') || e.target.closest('.color-picker-popup')) {
       return;
     }
     
@@ -261,8 +264,8 @@ export function start({ onEdit, onCommit }) {
 
   // Element selection logic
   document.addEventListener('click', (e) => {
-    if (e.target.closest('#figma-sidebar')) {
-      return; // Don't select elements when clicking on our UI
+    if (e.target.closest('#figma-sidebar') || e.target.closest('.color-picker-popup')) {
+      return; // Don't select elements when clicking on our UI or color picker
     }
     
     // Remove previous selection

@@ -425,6 +425,84 @@
       </div>
     </div>
   </div>
+  
+  <!-- Fill Controls Section -->
+  <div data-layer="FillControls" class="FillControls" style="align-self: stretch; height: 80px; position: relative; border-bottom: 1px #E6E6E6 solid; background: white">
+    <!-- Fill Color and Opacity Row -->
+    <div data-layer="FillColorRow" class="FillColorRow" style="width: 240px; height: 32px; left: 0px; top: 4px; position: absolute">
+      <!-- Color Swatch -->
+      <div data-layer="FillColorSwatch" class="FillColorSwatch" style="width: 24px; height: 24px; left: 16px; top: 4px; position: absolute; background: #FFFFFF; border-radius: 3px; border: 1px solid #E6E6E6"></div>
+      
+      <!-- Color Input -->
+      <div data-layer="FillColorInput" class="FillColorInput" style="width: 80px; height: 24px; left: 48px; top: 4px; position: absolute; background: #F5F5F5; border-radius: 3px; border: 1px solid #E6E6E6">
+        <div data-layer="FillColorValue" class="FillColorValue" style="width: 70px; height: 14px; left: 8px; top: 5px; position: absolute; color: rgba(0, 0, 0, 0.90); font-size: 10.83px; font-family: Inter; font-weight: 500; line-height: 14px; word-wrap: break-word">#FFFFFF</div>
+      </div>
+      
+      <!-- Opacity Input -->
+      <div data-layer="FillOpacityInput" class="FillOpacityInput" style="width: 50px; height: 24px; left: 136px; top: 4px; position: absolute; background: #F5F5F5; border-radius: 3px; border: 1px solid #E6E6E6">
+        <div data-layer="FillOpacityValue" class="FillOpacityValue" style="width: 30px; height: 14px; left: 8px; top: 5px; position: absolute; color: rgba(0, 0, 0, 0.90); font-size: 10.83px; font-family: Inter; font-weight: 500; line-height: 14px; word-wrap: break-word">100%</div>
+      </div>
+      
+      <!-- Visibility Toggle -->
+      <div data-layer="FillVisibilityToggle" class="FillVisibilityToggle" style="width: 24px; height: 24px; left: 194px; top: 4px; position: absolute; border-radius: 3px; cursor: pointer">
+        <div data-svg-wrapper data-layer="EyeIcon" class="EyeIcon" style="left: 4px; top: 4px; position: absolute">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 3C4.5 3 1.5 5.5 0.5 8C1.5 10.5 4.5 13 8 13C11.5 13 14.5 10.5 15.5 8C14.5 5.5 11.5 3 8 3ZM8 11C6.3 11 5 9.7 5 8C5 6.3 6.3 5 8 5C9.7 5 11 6.3 11 8C11 9.7 9.7 11 8 11ZM8 9.5C7.2 9.5 6.5 8.8 6.5 8C6.5 7.2 7.2 6.5 8 6.5C8.8 6.5 9.5 7.2 9.5 8C9.5 8.8 8.8 9.5 8 9.5Z" fill="black" fill-opacity="0.5"/>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- Remove Fill Button -->
+      <div data-layer="RemoveFillButton" class="RemoveFillButton" style="width: 24px; height: 24px; left: 216px; top: 4px; position: absolute; border-radius: 3px; cursor: pointer">
+        <div data-svg-wrapper data-layer="MinusIcon" class="MinusIcon" style="left: 4px; top: 4px; position: absolute">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 7H13V9H3V7Z" fill="black" fill-opacity="0.5"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Fill Style Row -->
+    <div data-layer="FillStyleRow" class="FillStyleRow" style="width: 240px; height: 32px; left: 0px; top: 44px; position: absolute">
+      <!-- Fill Type Dropdown -->
+      <div data-layer="FillTypeDropdown" class="FillTypeDropdown" style="width: 70px; height: 24px; left: 16px; top: 4px; position: absolute; background: #F5F5F5; border-radius: 3px; border: 1px solid #E6E6E6; cursor: pointer">
+        <div data-layer="FillTypeValue" class="FillTypeValue" style="width: 50px; height: 14px; left: 8px; top: 5px; position: absolute; color: rgba(0, 0, 0, 0.90); font-size: 10.83px; font-family: Inter; font-weight: 500; line-height: 14px; word-wrap: break-word">Solid</div>
+        <div data-svg-wrapper data-layer="DropdownArrow" class="DropdownArrow" style="left: 55px; top: 8px; position: absolute">
+          <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 3L4 5L6 3" stroke="black" stroke-opacity="0.5" stroke-width="1"/>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- Blend Mode Dropdown -->
+      <div data-layer="BlendModeDropdown" class="BlendModeDropdown" style="width: 80px; height: 24px; left: 94px; top: 4px; position: absolute; background: #F5F5F5; border-radius: 3px; border: 1px solid #E6E6E6; cursor: pointer">
+        <div data-layer="BlendModeValue" class="BlendModeValue" style="width: 60px; height: 14px; left: 8px; top: 5px; position: absolute; color: rgba(0, 0, 0, 0.90); font-size: 10.83px; font-family: Inter; font-weight: 500; line-height: 14px; word-wrap: break-word">Normal</div>
+        <div data-svg-wrapper data-layer="DropdownArrow" class="DropdownArrow" style="left: 65px; top: 8px; position: absolute">
+          <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 3L4 5L6 3" stroke="black" stroke-opacity="0.5" stroke-width="1"/>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- Advanced Fill Settings -->
+      <div data-layer="AdvancedFillSettings" class="AdvancedFillSettings" style="width: 24px; height: 24px; left: 182px; top: 4px; position: absolute; border-radius: 3px; cursor: pointer">
+        <div data-svg-wrapper data-layer="AdvancedIcon" class="AdvancedIcon" style="left: 4px; top: 4px; position: absolute">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 2L10 6H6L8 2ZM6 10L8 14L10 10H6ZM2 8L6 10L6 6L2 8ZM14 8L10 6L10 10L14 8Z" fill="black" fill-opacity="0.3"/>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- No Fill Toggle -->
+      <div data-layer="NoFillToggle" class="NoFillToggle" style="width: 24px; height: 24px; left: 214px; top: 4px; position: absolute; border-radius: 3px; cursor: pointer; border: 1px solid #E6E6E6">
+        <div data-svg-wrapper data-layer="NoFillIcon" class="NoFillIcon" style="left: 4px; top: 4px; position: absolute">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="12" height="12" stroke="black" stroke-opacity="0.5" stroke-width="1" fill="none"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
   <div data-layer="HorizontalBorder" class="Horizontalborder" style="align-self: stretch; height: 41px; position: relative; border-bottom: 1px #E6E6E6 solid">
     <div data-layer="Button" class="Button" style="width: 180px; height: 32px; left: 0px; top: 4px; position: absolute; overflow: hidden">
       <div data-layer="Heading 2 → Stroke" class="Heading2Stroke" style="width: 34.61px; height: 32px; left: 16px; top: 0px; position: absolute; justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.50); font-size: 10.83px; font-family: Inter; font-weight: 600; line-height: 32px; word-wrap: break-word">Stroke</div>
@@ -434,6 +512,84 @@
         <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path fill-rule="evenodd" clip-rule="evenodd" d="M11.7002 6.74768C11.8328 6.74768 11.96 6.80036 12.0537 6.89413C12.1475 6.9879 12.2002 7.11507 12.2002 7.24768V11.7477H16.7002C16.8328 11.7477 16.96 11.8004 17.0537 11.8941C17.1475 11.9879 17.2002 12.1151 17.2002 12.2477C17.2002 12.3803 17.1475 12.5075 17.0537 12.6012C16.96 12.695 16.8328 12.7477 16.7002 12.7477H12.2002V17.2477C12.2002 17.3803 12.1475 17.5075 12.0537 17.6012C11.96 17.695 11.8328 17.7477 11.7002 17.7477C11.5676 17.7477 11.4404 17.695 11.3466 17.6012C11.2529 17.5075 11.2002 17.3803 11.2002 17.2477V12.7477H6.7002C6.56759 12.7477 6.44041 12.695 6.34664 12.6012C6.25287 12.5075 6.2002 12.3803 6.2002 12.2477C6.2002 12.1151 6.25287 11.9879 6.34664 11.8941C6.44041 11.8004 6.56759 11.7477 6.7002 11.7477H11.2002V7.24768C11.2002 7.11507 11.2529 6.9879 11.3466 6.89413C11.4404 6.80036 11.5676 6.74768 11.7002 6.74768Z" fill="black" fill-opacity="0.5"/>
         </svg>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Stroke Controls Section -->
+  <div data-layer="StrokeControls" class="StrokeControls" style="align-self: stretch; height: 80px; position: relative; border-bottom: 1px #E6E6E6 solid; background: white">
+    <!-- Stroke Color and Opacity Row -->
+    <div data-layer="StrokeColorRow" class="StrokeColorRow" style="width: 240px; height: 32px; left: 0px; top: 4px; position: absolute">
+      <!-- Color Swatch -->
+      <div data-layer="StrokeColorSwatch" class="StrokeColorSwatch" style="width: 24px; height: 24px; left: 16px; top: 4px; position: absolute; background: #E2E9ED; border-radius: 3px; border: 1px solid #E6E6E6"></div>
+      
+      <!-- Color Input -->
+      <div data-layer="StrokeColorInput" class="StrokeColorInput" style="width: 80px; height: 24px; left: 48px; top: 4px; position: absolute; background: #F5F5F5; border-radius: 3px; border: 1px solid #E6E6E6">
+        <div data-layer="StrokeColorValue" class="StrokeColorValue" style="width: 70px; height: 14px; left: 8px; top: 5px; position: absolute; color: rgba(0, 0, 0, 0.90); font-size: 10.83px; font-family: Inter; font-weight: 500; line-height: 14px; word-wrap: break-word">#E2E9ED</div>
+      </div>
+      
+      <!-- Opacity Input -->
+      <div data-layer="StrokeOpacityInput" class="StrokeOpacityInput" style="width: 50px; height: 24px; left: 136px; top: 4px; position: absolute; background: #F5F5F5; border-radius: 3px; border: 1px solid #E6E6E6">
+        <div data-layer="StrokeOpacityValue" class="StrokeOpacityValue" style="width: 30px; height: 14px; left: 8px; top: 5px; position: absolute; color: rgba(0, 0, 0, 0.90); font-size: 10.83px; font-family: Inter; font-weight: 500; line-height: 14px; word-wrap: break-word">100%</div>
+      </div>
+      
+      <!-- Visibility Toggle -->
+      <div data-layer="StrokeVisibilityToggle" class="StrokeVisibilityToggle" style="width: 24px; height: 24px; left: 194px; top: 4px; position: absolute; border-radius: 3px; cursor: pointer">
+        <div data-svg-wrapper data-layer="EyeIcon" class="EyeIcon" style="left: 4px; top: 4px; position: absolute">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 3C4.5 3 1.5 5.5 0.5 8C1.5 10.5 4.5 13 8 13C11.5 13 14.5 10.5 15.5 8C14.5 5.5 11.5 3 8 3ZM8 11C6.3 11 5 9.7 5 8C5 6.3 6.3 5 8 5C9.7 5 11 6.3 11 8C11 9.7 9.7 11 8 11ZM8 9.5C7.2 9.5 6.5 8.8 6.5 8C6.5 7.2 7.2 6.5 8 6.5C8.8 6.5 9.5 7.2 9.5 8C9.5 8.8 8.8 9.5 8 9.5Z" fill="black" fill-opacity="0.5"/>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- Remove Stroke Button -->
+      <div data-layer="RemoveStrokeButton" class="RemoveStrokeButton" style="width: 24px; height: 24px; left: 216px; top: 4px; position: absolute; border-radius: 3px; cursor: pointer">
+        <div data-svg-wrapper data-layer="MinusIcon" class="MinusIcon" style="left: 4px; top: 4px; position: absolute">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 7H13V9H3V7Z" fill="black" fill-opacity="0.5"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Stroke Style and Width Row -->
+    <div data-layer="StrokeStyleRow" class="StrokeStyleRow" style="width: 240px; height: 32px; left: 0px; top: 44px; position: absolute">
+      <!-- Stroke Alignment Dropdown -->
+      <div data-layer="StrokeAlignmentDropdown" class="StrokeAlignmentDropdown" style="width: 70px; height: 24px; left: 16px; top: 4px; position: absolute; background: #F5F5F5; border-radius: 3px; border: 1px solid #E6E6E6; cursor: pointer">
+        <div data-layer="StrokeAlignmentValue" class="StrokeAlignmentValue" style="width: 50px; height: 14px; left: 8px; top: 5px; position: absolute; color: rgba(0, 0, 0, 0.90); font-size: 10.83px; font-family: Inter; font-weight: 500; line-height: 14px; word-wrap: break-word">Inside</div>
+        <div data-svg-wrapper data-layer="DropdownArrow" class="DropdownArrow" style="left: 55px; top: 8px; position: absolute">
+          <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 3L4 5L6 3" stroke="black" stroke-opacity="0.5" stroke-width="1"/>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- Stroke Style Input -->
+      <div data-layer="StrokeStyleInput" class="StrokeStyleInput" style="width: 80px; height: 24px; left: 94px; top: 4px; position: absolute; background: #F5F5F5; border-radius: 3px; border: 1px solid #E6E6E6">
+        <div data-svg-wrapper data-layer="StrokeStyleIcon" class="StrokeStyleIcon" style="left: 8px; top: 6px; position: absolute">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 6H10M2 3H10M2 9H10" stroke="black" stroke-opacity="0.5" stroke-width="1"/>
+          </svg>
+        </div>
+        <div data-layer="StrokeWidthValue" class="StrokeWidthValue" style="width: 30px; height: 14px; left: 24px; top: 5px; position: absolute; color: rgba(0, 0, 0, 0.90); font-size: 10.83px; font-family: Inter; font-weight: 500; line-height: 14px; word-wrap: break-word">1</div>
+      </div>
+      
+      <!-- Advanced Stroke Settings -->
+      <div data-layer="AdvancedStrokeSettings" class="AdvancedStrokeSettings" style="width: 24px; height: 24px; left: 182px; top: 4px; position: absolute; border-radius: 3px; cursor: pointer">
+        <div data-svg-wrapper data-layer="AdvancedIcon" class="AdvancedIcon" style="left: 4px; top: 4px; position: absolute">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 2L10 6H6L8 2ZM6 10L8 14L10 10H6ZM2 8L6 10L6 6L2 8ZM14 8L10 6L10 10L14 8Z" fill="black" fill-opacity="0.3"/>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- No Stroke Toggle -->
+      <div data-layer="NoStrokeToggle" class="NoStrokeToggle" style="width: 24px; height: 24px; left: 214px; top: 4px; position: absolute; border-radius: 3px; cursor: pointer; border: 1px solid #E6E6E6">
+        <div data-svg-wrapper data-layer="NoStrokeIcon" class="NoStrokeIcon" style="left: 4px; top: 4px; position: absolute">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="12" height="12" stroke="black" stroke-opacity="0.5" stroke-width="1" fill="none"/>
+          </svg>
+        </div>
       </div>
     </div>
   </div>

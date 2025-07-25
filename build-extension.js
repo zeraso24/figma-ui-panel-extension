@@ -40,4 +40,15 @@ require('esbuild').build({
   target: ['chrome58'],
   allowOverwrite: true,
   loader: { '.js': 'jsx', '.jsx': 'jsx' }
+}).catch(() => process.exit(1));
+
+// Bundle overlay.js with its dependencies
+require('esbuild').build({
+  entryPoints: ['extension/overlay.js'],
+  bundle: true,
+  outfile: 'dist/overlay.js',
+  format: 'iife',
+  target: ['chrome58'],
+  allowOverwrite: true,
+  loader: { '.js': 'jsx', '.jsx': 'jsx' }
 }).catch(() => process.exit(1)); 
