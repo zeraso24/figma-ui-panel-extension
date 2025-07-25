@@ -207,6 +207,30 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
       }
     });
   }
+
+  // Wire up individual corners button
+  const individualCornersButton = container.querySelector('[data-layer="Button dialog - Individual corners"]');
+  if (individualCornersButton) {
+    individualCornersButton.style.cursor = 'pointer';
+    individualCornersButton.addEventListener('click', () => {
+      // Toggle between single corner radius and individual corners
+      const cornerRadiusContainer = container.querySelector('[data-layer="Background+Border"]');
+      if (cornerRadiusContainer) {
+        const currentMode = cornerRadiusContainer.getAttribute('data-mode') || 'single';
+        const newMode = currentMode === 'single' ? 'individual' : 'single';
+        
+        if (newMode === 'individual') {
+          // Show individual corner inputs
+          showIndividualCornerInputs(cornerRadiusContainer, { getSelectedEl, onStyleEdit });
+        } else {
+          // Show single corner input
+          showSingleCornerInput(cornerRadiusContainer, { getSelectedEl, onStyleEdit });
+        }
+        
+        cornerRadiusContainer.setAttribute('data-mode', newMode);
+      }
+    });
+  }
   
     // Wire up the "Generate Ai instructions" button
   const aiButton = container.querySelector('.GenerateAiInstructions');
@@ -315,6 +339,30 @@ Please generate clear, step-by-step instructions for a developer to implement th
 
   // Wire up Stroke Controls
   wireUpStrokeControls(container, { getSelectedEl, onStyleEdit });
+
+  // Hide eye icons for now
+  const eyeIcons = container.querySelectorAll('[data-layer="EyeIcon"]');
+  eyeIcons.forEach(eyeIcon => {
+    eyeIcon.style.display = 'none';
+  });
+
+  // Hide fill dialog button for now
+  const fillDialogButton = container.querySelector('[data-layer="Button dialog - Fill, Apply styles and variables"]');
+  if (fillDialogButton) {
+    fillDialogButton.style.display = 'none';
+  }
+
+  // Hide fill visibility toggle container
+  const fillVisibilityToggle = container.querySelector('[data-layer="FillVisibilityToggle"]');
+  if (fillVisibilityToggle) {
+    fillVisibilityToggle.style.display = 'none';
+  }
+
+  // Hide stroke visibility toggle container
+  const strokeVisibilityToggle = container.querySelector('[data-layer="StrokeVisibilityToggle"]');
+  if (strokeVisibilityToggle) {
+    strokeVisibilityToggle.style.display = 'none';
+  }
 }
 
 // Update UI values from selected element
@@ -357,6 +405,12 @@ function updateUIFromSelectedElement(container, element) {
   if (radiusInput) {
     const radius = parseInt(style.borderRadius) || 0;
     radiusInput.textContent = radius;
+  }
+  
+  // Update individual corner inputs if they exist
+  const cornerInputs = container.querySelectorAll('.corner-input');
+  if (cornerInputs.length > 0) {
+    updateIndividualCornerValues(container, element);
   }
   
   // Update Fill Controls
@@ -963,4 +1017,280 @@ function rgbaToHex(rgba) {
   }
   
   return '#000000'; // fallback
+}
+
+// Helper function to show individual corner inputs
+function showIndividualCornerInputs(container, { getSelectedEl, onStyleEdit }) {
+  // Find the parent HorizontalBorder container
+  const horizontalBorder = container.closest('[data-layer="HorizontalBorder"]');
+  if (!horizontalBorder) return;
+  
+  // Expand the HorizontalBorder height to accommodate the individual corners
+  horizontalBorder.style.height = '117px'; // 85px + 32px for the new section
+  
+  // Create the individual corners section below the existing corner radius
+  const individualCornersSection = document.createElement('div');
+  individualCornersSection.className = 'IndividualCornersSection';
+  individualCornersSection.style.cssText = `
+    width: 240px;
+    height: 32px;
+    left: 0px;
+    top: 72px;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+  
+  // Create the 4-corner grid
+  const cornersGrid = document.createElement('div');
+  cornersGrid.style.cssText = `
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 4px;
+    width: 120px;
+    height: 24px;
+  `;
+  
+  // Create individual corner inputs
+  const corners = [
+    { corner: 'top-left', icon: 'M0 0H6V2H2V6H0V0Z', position: 'left: 2px; top: 2px;' },
+    { corner: 'top-right', icon: 'M2 0H8V2H2V6H0V0H2Z', position: 'right: 2px; top: 2px;' },
+    { corner: 'bottom-left', icon: 'M0 2H2V6H6V8H0V2Z', position: 'left: 2px; bottom: 2px;' },
+    { corner: 'bottom-right', icon: 'M2 2H8V6H6V8H2V2Z', position: 'right: 2px; bottom: 2px;' }
+  ];
+  
+  corners.forEach(({ corner, icon, position }) => {
+    const cornerInput = document.createElement('div');
+    cornerInput.className = 'corner-input';
+    cornerInput.setAttribute('data-corner', corner);
+    cornerInput.style.cssText = `
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #F5F5F5;
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+      border: 1px solid #E6E6E6;
+    `;
+    
+    // Create the L-shaped icon
+    const iconSvg = document.createElement('svg');
+    iconSvg.setAttribute('width', '8');
+    iconSvg.setAttribute('height', '8');
+    iconSvg.setAttribute('viewBox', '0 0 8 8');
+    iconSvg.setAttribute('fill', 'none');
+    iconSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    iconSvg.style.cssText = `position: absolute; ${position}`;
+    
+    const iconPath = document.createElement('path');
+    iconPath.setAttribute('d', icon);
+    iconPath.setAttribute('fill', 'black');
+    iconPath.setAttribute('fill-opacity', '0.5');
+    iconSvg.appendChild(iconPath);
+    
+    // Create the value span
+    const valueSpan = document.createElement('span');
+    valueSpan.className = 'corner-value';
+    valueSpan.style.cssText = `
+      font-size: 10px;
+      color: rgba(0, 0, 0, 0.90);
+      font-family: Inter;
+      font-weight: 500;
+    `;
+    valueSpan.textContent = '0';
+    
+    cornerInput.appendChild(iconSvg);
+    cornerInput.appendChild(valueSpan);
+    cornersGrid.appendChild(cornerInput);
+  });
+  
+  individualCornersSection.appendChild(cornersGrid);
+  horizontalBorder.appendChild(individualCornersSection);
+  
+  // Wire up the corner inputs
+  const cornerInputs = container.querySelectorAll('.corner-input');
+  cornerInputs.forEach(cornerInput => {
+    cornerInput.addEventListener('click', () => {
+      const corner = cornerInput.getAttribute('data-corner');
+      const valueSpan = cornerInput.querySelector('.corner-value');
+      
+      // Make it editable
+      valueSpan.contentEditable = true;
+      valueSpan.focus();
+      
+      // Select all text
+      const range = document.createRange();
+      range.selectNodeContents(valueSpan);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      
+      // Add visual feedback
+      cornerInput.style.background = '#E3F2FD';
+      cornerInput.style.border = '1px solid #2196F3';
+    });
+    
+    cornerInput.addEventListener('input', (e) => {
+      const corner = cornerInput.getAttribute('data-corner');
+      const value = e.target.textContent.trim();
+      const numValue = parseInt(value) || 0;
+      
+      const el = getSelectedEl();
+      if (el) {
+        // Get current border radius values
+        const currentRadius = getComputedStyle(el).borderRadius;
+        const values = parseBorderRadius(currentRadius);
+        
+        // Update the specific corner
+        values[corner] = numValue;
+        
+        // Apply the new border radius
+        const newRadius = formatBorderRadius(values);
+        el.style.borderRadius = newRadius;
+        onStyleEdit('borderRadius', newRadius);
+      }
+    });
+    
+    cornerInput.addEventListener('blur', () => {
+      const valueSpan = cornerInput.querySelector('.corner-value');
+      valueSpan.contentEditable = false;
+      cornerInput.style.background = '#F5F5F5';
+      cornerInput.style.border = '';
+    });
+    
+    cornerInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        cornerInput.querySelector('.corner-value').blur();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        cornerInput.querySelector('.corner-value').blur();
+      }
+    });
+  });
+  
+  // Initialize with current values
+  updateIndividualCornerValues(container, getSelectedEl());
+}
+
+// Helper function to show single corner input
+function showSingleCornerInput(container, { getSelectedEl, onStyleEdit }) {
+  // Find the parent HorizontalBorder container
+  const horizontalBorder = container.closest('[data-layer="HorizontalBorder"]');
+  if (!horizontalBorder) return;
+  
+  // Restore the original HorizontalBorder height
+  horizontalBorder.style.height = '85px';
+  
+  // Remove the individual corners section if it exists
+  const individualCornersSection = horizontalBorder.querySelector('.IndividualCornersSection');
+  if (individualCornersSection) {
+    individualCornersSection.remove();
+  }
+  
+  // The original corner radius input should already be there, just make sure it's wired up
+  const radiusInput = container.querySelector('[data-layer="0"]');
+  if (radiusInput) {
+    radiusInput.contentEditable = true;
+    radiusInput.addEventListener('input', (e) => {
+      const el = getSelectedEl();
+      if (el) {
+        onStyleEdit('borderRadius', e.target.textContent + 'px');
+      }
+    });
+  }
+  
+  // Initialize with current value
+  updateSingleCornerValue(container, getSelectedEl());
+}
+
+// Helper function to parse border radius values
+function parseBorderRadius(borderRadius) {
+  const values = borderRadius.split(' ').map(v => parseInt(v) || 0);
+  
+  // Handle different formats: single value, two values, four values
+  if (values.length === 1) {
+    return {
+      'top-left': values[0],
+      'top-right': values[0],
+      'bottom-right': values[0],
+      'bottom-left': values[0]
+    };
+  } else if (values.length === 2) {
+    return {
+      'top-left': values[0],
+      'top-right': values[1],
+      'bottom-right': values[0],
+      'bottom-left': values[1]
+    };
+  } else if (values.length === 4) {
+    return {
+      'top-left': values[0],
+      'top-right': values[1],
+      'bottom-right': values[2],
+      'bottom-left': values[3]
+    };
+  }
+  
+  return {
+    'top-left': 0,
+    'top-right': 0,
+    'bottom-right': 0,
+    'bottom-left': 0
+  };
+}
+
+// Helper function to format border radius values
+function formatBorderRadius(values) {
+  const { 'top-left': tl, 'top-right': tr, 'bottom-right': br, 'bottom-left': bl } = values;
+  
+  // If all values are the same, use single value
+  if (tl === tr && tr === br && br === bl) {
+    return `${tl}px`;
+  }
+  
+  // If top-left equals bottom-right and top-right equals bottom-left, use two values
+  if (tl === br && tr === bl) {
+    return `${tl}px ${tr}px`;
+  }
+  
+  // Otherwise, use four values
+  return `${tl}px ${tr}px ${br}px ${bl}px`;
+}
+
+// Helper function to update individual corner values
+function updateIndividualCornerValues(container, element) {
+  if (!element) return;
+  
+  const style = getComputedStyle(element);
+  const borderRadius = style.borderRadius;
+  const values = parseBorderRadius(borderRadius);
+  
+  // Find corner inputs in the entire document since they might be in a different container
+  const cornerInputs = document.querySelectorAll('.corner-input');
+  cornerInputs.forEach(cornerInput => {
+    const corner = cornerInput.getAttribute('data-corner');
+    const valueSpan = cornerInput.querySelector('.corner-value');
+    if (valueSpan && values[corner] !== undefined) {
+      valueSpan.textContent = values[corner];
+    }
+  });
+}
+
+// Helper function to update single corner value
+function updateSingleCornerValue(container, element) {
+  if (!element) return;
+  
+  const style = getComputedStyle(element);
+  const borderRadius = style.borderRadius;
+  const values = parseBorderRadius(borderRadius);
+  
+  // Use the first value (all should be the same in single mode)
+  const radiusInput = container.querySelector('[data-layer="0"]');
+  if (radiusInput) {
+    radiusInput.textContent = values['top-left'];
+  }
 } 
