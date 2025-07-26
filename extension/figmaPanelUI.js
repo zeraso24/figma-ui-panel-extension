@@ -625,7 +625,7 @@ function updateUIFromSelectedElement(container, element) {
     }
   }
   
-  // Update the new input field if it exists
+  // Update the rotation input field (it's a proper input element)
   if (container.rotationInputField) {
     const rotation = getCurrentRotation(element);
     container.rotationInputField.value = (rotation !== undefined && rotation !== null) ? rotation.toString() + '°' : '0°';
@@ -685,6 +685,9 @@ function updateUIFromSelectedElement(container, element) {
   // Fix rotation input container styling
   fixRotationInputContainer(container);
 }
+
+// Make updateUIFromSelectedElement globally available
+window.updateUIFromSelectedElement = updateUIFromSelectedElement;
 
 // Helper function to get current rotation
 function getCurrentRotation(element) {

@@ -117,8 +117,8 @@ function addKeyboardShortcutsPanel(sidebar) {
 // Make fetchOpenRouterInstruction globally available
 window.fetchOpenRouterInstruction = async function(prompt) {
   try {
-    // Use a more reliable API key - you may need to update this
-    const apiKey = "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";
+    // Use the new API key with Qwen model
+    const apiKey = "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";
     
     if (window.logToConsolePanel) {
       window.logToConsolePanel("Calling OpenRouter API...", "info");
@@ -134,16 +134,16 @@ window.fetchOpenRouterInstruction = async function(prompt) {
         "X-Title": "Visual Patch Editor"
       },
       body: JSON.stringify({
-        model: "anthropic/claude-3-haiku", // Faster model
+        model: "qwen/qwen3-coder:free", // Qwen model for code generation
         messages: [
           { 
             role: "system", 
-            content: "You are an expert UI developer. Generate concise, practical CSS/HTML instructions for UI changes. Be specific and actionable." 
+            content: "You are an expert UI developer. Generate concise, practical CSS/HTML instructions for UI changes. Be specific and actionable. Focus on clean, production-ready code." 
           },
           { role: "user", content: prompt }
         ],
-        max_tokens: 500, // Shorter response for speed
-        temperature: 0.2 // More focused
+        max_tokens: 800, // More tokens for detailed instructions
+        temperature: 0.1 // Very focused for code generation
       })
     });
 
@@ -169,19 +169,77 @@ window.fetchOpenRouterInstruction = async function(prompt) {
       window.logToConsolePanel(`OpenRouter error: ${error.message}`, "error");
     }
     
-    // Fallback to a simple instruction format
-    return `Manual Instructions:
+    // Fallback to a detailed instruction format based on actual changes
+    const currentEdits = window.edits || [];
+    let fallbackInstructions = `Manual Instructions:
     
 Based on your UI changes, here are the steps to implement them:
 
-1. Open your CSS file or add a <style> tag
-2. Apply the following changes to the selected element:
-   - Use the CSS selector: ${getSelector(selectedEl || document.body)}
-   - Update the properties as shown in the console log
+1. Open your CSS file or add a <style> tag`;
+
+    if (currentEdits.length > 0) {
+      // Deduplicate edits: only keep the last edit for each (selector, prop)
+      const finalEdits = new Map();
+      for (const edit of currentEdits) {
+        const key = `${edit.selector}||${edit.prop}`;
+        finalEdits.set(key, edit);
+      }
+      
+      // Group final edits by element
+      const elementGroups = new Map();
+      for (const edit of finalEdits.values()) {
+        if (!elementGroups.has(edit.selector)) {
+          elementGroups.set(edit.selector, []);
+        }
+        elementGroups.get(edit.selector).push(edit);
+      }
+
+      elementGroups.forEach((edits, selector) => {
+        fallbackInstructions += `\n\n2. Apply the following changes to element: ${selector}`;
+        edits.forEach((edit) => {
+          let propertyDescription = edit.prop;
+          let valueDescription = edit.newValue;
+          
+          if (edit.prop === 'transform' && edit.newValue.includes('rotate')) {
+            const match = edit.newValue.match(/rotate\(([^)]+)deg\)/);
+            if (match) {
+              propertyDescription = 'transform (rotation)';
+              valueDescription = `rotate(${match[1]}deg)`;
+            }
+          } else if (edit.prop === 'left' || edit.prop === 'top') {
+            propertyDescription = `position (${edit.prop})`;
+          } else if (edit.prop === 'width' || edit.prop === 'height') {
+            propertyDescription = `size (${edit.prop})`;
+          } else if (edit.prop === 'backgroundColor') {
+            propertyDescription = 'background color';
+          } else if (edit.prop === 'borderColor') {
+            propertyDescription = 'border color';
+          } else if (edit.prop === 'textAlign') {
+            propertyDescription = 'text alignment';
+          } else if (edit.prop === 'opacity') {
+            propertyDescription = 'opacity';
+            valueDescription = `${Math.round(parseFloat(edit.newValue) * 100)}%`;
+          } else if (edit.prop === 'borderRadius') {
+            propertyDescription = 'border radius';
+          }
+          
+          fallbackInstructions += `\n   - ${propertyDescription}: ${valueDescription}`;
+        });
+      });
+    } else {
+      fallbackInstructions += `\n2. Apply the following changes to the selected element:`;
+      fallbackInstructions += `\n   - Use the CSS selector: ${getSelector(selectedEl || document.body)}`;
+      fallbackInstructions += `\n   - Update the properties as shown in the console log`;
+    }
+
+    fallbackInstructions += `
+
 3. Test the changes in your browser
 4. Adjust as needed for your specific use case
 
-Note: This is a fallback instruction. Check the console for detailed change information.`;
+Note: This is a fallback instruction. The AI service was unavailable, but all your changes have been logged in the console.`;
+
+    return fallbackInstructions;
   }
 };
 
@@ -318,6 +376,16 @@ export function start({ onEdit, onCommit }) {
     // Update the Figma panel inputs with the new element's properties
     if (window.updateFigmaPanelInputs) {
       window.updateFigmaPanelInputs();
+    }
+    
+    // Also update the panel directly if the function exists
+    const sidebar = document.getElementById('figma-sidebar');
+    if (sidebar && window.updateUIFromSelectedElement) {
+      // Find the container with the input fields - try multiple selectors
+      const container = sidebar.querySelector('[data-layer="32464"]')?.parentNode?.parentNode?.parentNode || 
+                       sidebar.querySelector('.Container') || 
+                       sidebar;
+      window.updateUIFromSelectedElement(container, selectedEl);
     }
     
     // Log detailed selection information
