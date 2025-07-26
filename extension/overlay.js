@@ -85,6 +85,34 @@ function logToConsolePanel(msg, type = "info") {
 // Make logToConsolePanel globally available
 window.logToConsolePanel = logToConsolePanel;
 
+// Add keyboard shortcuts help panel
+function addKeyboardShortcutsPanel(sidebar) {
+  let shortcutsPanel = document.getElementById("keyboard-shortcuts-panel");
+  if (!shortcutsPanel) {
+    shortcutsPanel = document.createElement("div");
+    shortcutsPanel.id = "keyboard-shortcuts-panel";
+    shortcutsPanel.style.background = "#f8f9fa";
+    shortcutsPanel.style.border = "1px solid #e9ecef";
+    shortcutsPanel.style.borderRadius = "8px";
+    shortcutsPanel.style.padding = "12px";
+    shortcutsPanel.style.marginTop = "12px";
+    shortcutsPanel.style.marginBottom = "12px";
+    shortcutsPanel.style.fontSize = "11px";
+    shortcutsPanel.style.color = "#495057";
+    
+    shortcutsPanel.innerHTML = `
+      <div style="font-weight: 600; margin-bottom: 8px; color: #212529;">⌨️ Keyboard Shortcuts</div>
+      <div style="margin-bottom: 4px;"><strong>Shift</strong> - Select hovered element</div>
+      <div style="margin-bottom: 4px;"><strong>Enter</strong> - Go inside element (first child)</div>
+      <div style="margin-bottom: 4px;"><strong>Shift + Enter</strong> - Go to parent element</div>
+      <div style="margin-bottom: 4px;"><strong>Escape</strong> - Deselect element</div>
+    `;
+    
+    sidebar.appendChild(shortcutsPanel);
+  }
+  return shortcutsPanel;
+}
+
 // Add OpenRouter fallback function at the top-level
 // Make fetchOpenRouterInstruction globally available
 window.fetchOpenRouterInstruction = async function(prompt) {
@@ -201,6 +229,9 @@ export function start({ onEdit, onCommit }) {
   // Add console panel
   addConsolePanel(sidebar);
   logToConsolePanel("Overlay loaded. Ready to edit UI.");
+  
+  // Add keyboard shortcuts help panel
+  addKeyboardShortcutsPanel(sidebar);
 
   let selectedEl = null;
   let hoveredEl = null;
@@ -268,6 +299,11 @@ export function start({ onEdit, onCommit }) {
       return; // Don't select elements when clicking on our UI or color picker
     }
     
+    // Prevent default behavior for all clickable elements during selection mode
+    // This prevents navigation, form submissions, and other default actions
+    e.preventDefault();
+    e.stopPropagation();
+    
     // Remove previous selection
     if (selectedEl) {
       selectedEl.style.outline = '';
@@ -301,34 +337,97 @@ export function start({ onEdit, onCommit }) {
     logToConsolePanel(`Selected: ${elementInfo.selector}`);
   });
 
-  // Keyboard navigation for element selection
+  // Enhanced keyboard navigation for element selection
   document.addEventListener('keydown', (e) => {
-    if (!selectedEl) return;
-    
-    let nextElement = null;
+    // Only prevent default for our specific shortcuts, not all arrow keys
+    if (['Shift', 'Enter', 'Escape'].includes(e.key)) {
+      e.preventDefault();
+    }
     
     switch (e.key) {
-      case 'Tab':
-        e.preventDefault();
-        // Navigate to next sibling or first child
-        nextElement = selectedEl.nextElementSibling || selectedEl.firstElementChild;
+      case 'Shift':
+        // Shift: Select the currently hovered element
+        if (hoveredEl && hoveredEl !== selectedEl) {
+          // Remove previous selection
+          if (selectedEl) {
+            selectedEl.style.outline = '';
+          }
+          
+          selectedEl = hoveredEl;
+          selectedEl.style.outline = '3px solid #0066FF'; // Blue solid border for selection
+          
+          // Update the global selected element reference
+          window.selectedEl = selectedEl;
+          
+          // Update the Figma panel inputs with the new element's properties
+          if (window.updateFigmaPanelInputs) {
+            window.updateFigmaPanelInputs();
+          }
+          
+          // Log detailed selection information
+          const elementInfo = getElementInfo(selectedEl);
+          console.log('🔵 SELECTED (Shift):', elementInfo.selector);
+          console.log('📍 Position:', `${elementInfo.bounds.x}, ${elementInfo.bounds.y}`);
+          console.log('📏 Size:', `${elementInfo.bounds.width} × ${elementInfo.bounds.height}`);
+          console.log('🏷️  Tag:', elementInfo.tagName);
+          console.log('🆔 ID:', elementInfo.id || 'none');
+          console.log('🎨 Class:', elementInfo.className || 'none');
+          console.log('📝 Text:', elementInfo.textContent);
+          console.log('👶 Children:', elementInfo.children);
+          console.log('🎨 Styles:', elementInfo.styles);
+          console.log('🔗 Element:', selectedEl);
+          console.log('=====================================');
+          
+          logToConsolePanel(`Selected (Shift): ${elementInfo.selector}`);
+        }
         break;
-      case 'ArrowRight':
-        e.preventDefault();
-        nextElement = selectedEl.nextElementSibling;
+        
+      case 'Enter':
+        if (!selectedEl) return;
+        
+        if (e.shiftKey) {
+          // Shift + Enter: Go to parent element
+          const parentElement = selectedEl.parentElement;
+          if (parentElement && parentElement !== document.body) {
+            // Remove current selection
+            selectedEl.style.outline = '';
+            
+            selectedEl = parentElement;
+            selectedEl.style.outline = '3px solid #0066FF';
+            window.selectedEl = selectedEl;
+            
+            // Update panel
+            if (window.updateFigmaPanelInputs) {
+              window.updateFigmaPanelInputs();
+            }
+            
+            const elementInfo = getElementInfo(selectedEl);
+            console.log('⬆️  MOVED TO PARENT:', elementInfo.selector);
+            logToConsolePanel(`Moved to parent: ${elementInfo.selector}`);
+          }
+        } else {
+          // Enter: Go to first child element
+          const firstChild = selectedEl.firstElementChild;
+          if (firstChild) {
+            // Remove current selection
+            selectedEl.style.outline = '';
+            
+            selectedEl = firstChild;
+            selectedEl.style.outline = '3px solid #0066FF';
+            window.selectedEl = selectedEl;
+            
+            // Update panel
+            if (window.updateFigmaPanelInputs) {
+              window.updateFigmaPanelInputs();
+            }
+            
+            const elementInfo = getElementInfo(selectedEl);
+            console.log('⬇️  MOVED TO CHILD:', elementInfo.selector);
+            logToConsolePanel(`Moved to child: ${elementInfo.selector}`);
+          }
+        }
         break;
-      case 'ArrowLeft':
-        e.preventDefault();
-        nextElement = selectedEl.previousElementSibling;
-        break;
-      case 'ArrowDown':
-        e.preventDefault();
-        nextElement = selectedEl.nextElementSibling;
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        nextElement = selectedEl.previousElementSibling;
-        break;
+        
       case 'Escape':
         // Deselect current element
         if (selectedEl) {
@@ -338,17 +437,7 @@ export function start({ onEdit, onCommit }) {
           console.log('❌ Deselected element');
           logToConsolePanel('Deselected element');
         }
-        return;
-    }
-    
-    if (nextElement) {
-      // Simulate click on next element
-      const clickEvent = new MouseEvent('click', {
-        bubbles: true,
-        cancelable: true,
-        view: window
-      });
-      nextElement.dispatchEvent(clickEvent);
+        break;
     }
   });
 

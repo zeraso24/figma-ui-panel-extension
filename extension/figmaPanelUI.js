@@ -46,22 +46,57 @@ async function loadFigmaPanelHTML(sidebar, { getSelectedEl, onStyleEdit }) {
 // Wire up all event handlers for the HTML UI
 function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
   
-  // Position alignment buttons
-  const alignButtons = {
+  // Position alignment buttons - Horizontal alignment
+  const horizontalAlignButtons = {
     'ButtonAlignLeft': () => onStyleEdit('textAlign', 'left'),
     'ButtonAlignHorizontalCenters': () => onStyleEdit('textAlign', 'center'),
-    'ButtonAlignRight': () => onStyleEdit('textAlign', 'right'),
+    'ButtonAlignRight': () => onStyleEdit('textAlign', 'right')
+  };
+  
+  // Position alignment buttons - Vertical alignment
+  const verticalAlignButtons = {
     'ButtonAlignTop': () => onStyleEdit('verticalAlign', 'top'),
     'ButtonAlignVerticalCenters': () => onStyleEdit('verticalAlign', 'middle'),
     'ButtonAlignBottom': () => onStyleEdit('verticalAlign', 'bottom')
   };
   
-  // Wire up alignment buttons
-  Object.entries(alignButtons).forEach(([className, handler]) => {
+  // Wire up horizontal alignment buttons
+  Object.entries(horizontalAlignButtons).forEach(([className, handler]) => {
     const button = container.querySelector(`.${className}`);
     if (button) {
       button.style.cursor = 'pointer';
-      button.addEventListener('click', handler);
+      button.addEventListener('click', () => {
+        handler();
+        // Update UI to reflect the change
+        const el = getSelectedEl();
+        if (el) {
+          updateUIFromSelectedElement(container, el);
+        }
+      });
+      
+      // Add hover effects
+      button.addEventListener('mouseenter', () => {
+        button.style.background = '#E0E0E0';
+      });
+      button.addEventListener('mouseleave', () => {
+        button.style.background = '#F5F5F5';
+      });
+    }
+  });
+  
+  // Wire up vertical alignment buttons
+  Object.entries(verticalAlignButtons).forEach(([className, handler]) => {
+    const button = container.querySelector(`.${className}`);
+    if (button) {
+      button.style.cursor = 'pointer';
+      button.addEventListener('click', () => {
+        handler();
+        // Update UI to reflect the change
+        const el = getSelectedEl();
+        if (el) {
+          updateUIFromSelectedElement(container, el);
+        }
+      });
       
       // Add hover effects
       button.addEventListener('mouseenter', () => {
@@ -82,7 +117,16 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
     xInput.addEventListener('input', (e) => {
       const el = getSelectedEl();
       if (el) {
-        onStyleEdit('left', e.target.textContent + 'px');
+        const value = e.target.textContent.replace(/[^\d.-]/g, '');
+        onStyleEdit('left', value + 'px');
+      }
+    });
+    
+    // Handle Enter key to commit changes
+    xInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        xInput.blur();
       }
     });
   }
@@ -92,22 +136,144 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
     yInput.addEventListener('input', (e) => {
       const el = getSelectedEl();
       if (el) {
-        onStyleEdit('top', e.target.textContent + 'px');
+        const value = e.target.textContent.replace(/[^\d.-]/g, '');
+        onStyleEdit('top', value + 'px');
+      }
+    });
+    
+    // Handle Enter key to commit changes
+    yInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        yInput.blur();
       }
     });
   }
   
-  // Wire up rotation input
+  // Wire up rotation input with proper input field approach
   const rotationInput = container.querySelector('[data-layer="0°"]');
   if (rotationInput) {
-    rotationInput.contentEditable = true;
-    rotationInput.addEventListener('input', (e) => {
-      const el = getSelectedEl();
-      if (el) {
-        const value = e.target.textContent.replace('°', '');
-        onStyleEdit('transform', `rotate(${value}deg)`);
+    // Create a proper input field by replacing the contentEditable div
+    const inputField = document.createElement('input');
+    inputField.type = 'text';
+    inputField.value = '0°';
+    inputField.style.cssText = `
+      width: auto;
+      height: 14px;
+      left: 0px;
+      top: 0px;
+      position: relative;
+      justify-content: center;
+      display: flex;
+      flex-direction: column;
+      color: rgba(0, 0, 0, 0.9);
+      font-size: 11px;
+      font-family: Inter;
+      font-weight: 500;
+      letter-spacing: 0.05px;
+      overflow-wrap: break-word;
+      min-width: 12px;
+      max-width: 80px;
+      padding: 0px 4px;
+      box-sizing: border-box;
+      overflow: visible;
+      border: none;
+      background-color: transparent;
+      outline: none;
+      transition: all 0.2s ease;
+    `;
+    
+    // Replace the contentEditable div with the input
+    rotationInput.parentNode.replaceChild(inputField, rotationInput);
+    
+    // Add hover and focus effects
+    inputField.addEventListener('mouseenter', () => {
+      inputField.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
+    });
+    
+    inputField.addEventListener('mouseleave', () => {
+      if (!inputField.matches(':focus')) {
+        inputField.style.backgroundColor = 'transparent';
       }
     });
+    
+    inputField.addEventListener('focus', () => {
+      inputField.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
+      inputField.style.outline = '1px solid #0077EE';
+      inputField.select(); // Select all text when focused
+    });
+    
+    inputField.addEventListener('blur', () => {
+      inputField.style.backgroundColor = 'transparent';
+      inputField.style.outline = 'none';
+      
+      // Set default value if empty or only contains degree symbol
+      if (inputField.value === '' || inputField.value === '°' || inputField.value.replace(/[^\d.-]/g, '') === '') {
+        inputField.value = '0°';
+        const el = getSelectedEl();
+        if (el) {
+          onStyleEdit('transform', 'rotate(0deg)');
+        }
+      }
+    });
+    
+    // Handle input changes
+    inputField.addEventListener('input', (e) => {
+      const el = getSelectedEl();
+      if (el) {
+        // Remove degree symbol for processing, only allow numbers, decimal point, and minus sign
+        const cleanValue = e.target.value.replace(/[^\d.-]/g, '');
+        
+        // Update the input to show the clean value with degree symbol
+        if (cleanValue === '') {
+          e.target.value = '0°';
+          onStyleEdit('transform', 'rotate(0deg)');
+        } else {
+          e.target.value = cleanValue + '°';
+          onStyleEdit('transform', `rotate(${cleanValue}deg)`);
+        }
+      }
+    });
+    
+    // Handle keydown for validation
+    inputField.addEventListener('keydown', (e) => {
+      // Allow all navigation and editing keys
+      if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Tab', 'Enter', 'Escape'].includes(e.key)) {
+        return; // Don't prevent default for these keys
+      }
+      
+      // Allow modifier keys (Ctrl, Cmd, etc.)
+      if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) {
+        return; // Don't prevent default for modifier combinations
+      }
+      
+      // Only allow numbers, decimal point, minus sign, and degree symbol
+      if (!/[\d.-°]/.test(e.key)) {
+        e.preventDefault();
+      }
+    });
+    
+    // Handle Enter to commit
+    inputField.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        inputField.blur();
+      }
+    });
+    
+    // Handle paste event to clean input
+    inputField.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+      const cleanValue = pastedText.replace(/[^\d.-]/g, '');
+      if (cleanValue) {
+        inputField.value = cleanValue;
+        inputField.dispatchEvent(new Event('input'));
+      }
+    });
+    
+    // Store reference to the new input field for updates
+    container.rotationInputField = inputField;
   }
   
   // Wire up rotation buttons
@@ -123,6 +289,14 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
         updateUIFromSelectedElement(container, el);
       }
     });
+    
+    // Add hover effects
+    rotateButton.addEventListener('mouseenter', () => {
+      rotateButton.style.background = '#E0E0E0';
+    });
+    rotateButton.addEventListener('mouseleave', () => {
+      rotateButton.style.background = '#F5F5F5';
+    });
   }
   
   // Wire up flip buttons
@@ -136,11 +310,27 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
       if (el) {
         const currentTransform = el.style.transform || '';
         const hasFlipX = currentTransform.includes('scaleX(-1)');
-        const newTransform = hasFlipX 
-          ? currentTransform.replace('scaleX(-1)', '')
-          : currentTransform + ' scaleX(-1)';
-        onStyleEdit('transform', newTransform.trim());
+        let newTransform;
+        
+        if (hasFlipX) {
+          // Remove horizontal flip
+          newTransform = currentTransform.replace('scaleX(-1)', '').trim();
+        } else {
+          // Add horizontal flip
+          newTransform = currentTransform + ' scaleX(-1)';
+        }
+        
+        onStyleEdit('transform', newTransform);
+        updateUIFromSelectedElement(container, el);
       }
+    });
+    
+    // Add hover effects
+    flipHorizontal.addEventListener('mouseenter', () => {
+      flipHorizontal.style.background = '#E0E0E0';
+    });
+    flipHorizontal.addEventListener('mouseleave', () => {
+      flipHorizontal.style.background = '#F5F5F5';
     });
   }
   
@@ -151,11 +341,27 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
       if (el) {
         const currentTransform = el.style.transform || '';
         const hasFlipY = currentTransform.includes('scaleY(-1)');
-        const newTransform = hasFlipY 
-          ? currentTransform.replace('scaleY(-1)', '')
-          : currentTransform + ' scaleY(-1)';
-        onStyleEdit('transform', newTransform.trim());
+        let newTransform;
+        
+        if (hasFlipY) {
+          // Remove vertical flip
+          newTransform = currentTransform.replace('scaleY(-1)', '').trim();
+        } else {
+          // Add vertical flip
+          newTransform = currentTransform + ' scaleY(-1)';
+        }
+        
+        onStyleEdit('transform', newTransform);
+        updateUIFromSelectedElement(container, el);
       }
+    });
+    
+    // Add hover effects
+    flipVertical.addEventListener('mouseenter', () => {
+      flipVertical.style.background = '#E0E0E0';
+    });
+    flipVertical.addEventListener('mouseleave', () => {
+      flipVertical.style.background = '#F5F5F5';
     });
   }
   
@@ -332,6 +538,9 @@ Please generate clear, step-by-step instructions for a developer to implement th
   // Wire up Stroke Controls
   wireUpStrokeControls(container, { getSelectedEl, onStyleEdit });
 
+  // Fix rotation input container styling
+  fixRotationInputContainer(container);
+
   // Hide eye icons for now
   const eyeIcons = container.querySelectorAll('[data-layer="EyeIcon"]');
   eyeIcons.forEach(eyeIcon => {
@@ -359,64 +568,213 @@ Please generate clear, step-by-step instructions for a developer to implement th
 
 // Update UI values from selected element
 function updateUIFromSelectedElement(container, element) {
-  if (!element) return;
-  
-  const rect = element.getBoundingClientRect();
-  const style = getComputedStyle(element);
-  
-  // Update X/Y position
+  // X/Y position
   const xInput = container.querySelector('[data-layer="32464"]');
   const yInput = container.querySelector('[data-layer="20162"]');
-  
-  if (xInput) xInput.textContent = Math.round(rect.left);
-  if (yInput) yInput.textContent = Math.round(rect.top);
-  
-  // Update width/height
+  // Width/height
   const widthInput = container.querySelector('[data-layer="1600"]');
   const heightInput = container.querySelector('[data-layer="960"]');
-  
-  if (widthInput) widthInput.textContent = Math.round(rect.width);
-  if (heightInput) heightInput.textContent = Math.round(rect.height);
-  
-  // Update rotation
+  // Rotation
   const rotationInput = container.querySelector('[data-layer="0°"]');
+  // Opacity
+  const opacityInput = container.querySelector('[data-layer="100%"]');
+  // Border radius
+  const radiusInput = container.querySelector('[data-layer="0"]');
+  // Alignment
+  const alignLeft = container.querySelector('.ButtonAlignLeft');
+  const alignCenter = container.querySelector('.ButtonAlignHorizontalCenters');
+  const alignRight = container.querySelector('.ButtonAlignRight');
+  const alignTop = container.querySelector('.ButtonAlignTop');
+  const alignMiddle = container.querySelector('.ButtonAlignVerticalCenters');
+  const alignBottom = container.querySelector('.ButtonAlignBottom');
+
+  if (!element) {
+    if (xInput) xInput.textContent = '';
+    if (yInput) yInput.textContent = '';
+    if (widthInput) widthInput.textContent = '';
+    if (heightInput) heightInput.textContent = '';
+    if (rotationInput) rotationInput.textContent = '';
+    if (opacityInput) opacityInput.textContent = '';
+    if (radiusInput) radiusInput.textContent = '';
+    // Remove alignment highlights
+    [alignLeft, alignCenter, alignRight, alignTop, alignMiddle, alignBottom].forEach(btn => {
+      if (btn) btn.style.outline = '';
+    });
+    // Fill/Stroke controls
+    updateFillControls(container, null, null);
+    updateStrokeControls(container, null, null);
+    return;
+  }
+
+  const rect = element.getBoundingClientRect();
+  const style = getComputedStyle(element);
+
+  if (xInput) xInput.textContent = style.left && style.left !== 'auto' ? parseInt(style.left) : Math.round(rect.left);
+  if (yInput) yInput.textContent = style.top && style.top !== 'auto' ? parseInt(style.top) : Math.round(rect.top);
+  if (widthInput) widthInput.textContent = style.width ? parseInt(style.width) : Math.round(rect.width);
+  if (heightInput) heightInput.textContent = style.height ? parseInt(style.height) : Math.round(rect.height);
   if (rotationInput) {
     const rotation = getCurrentRotation(element);
-    rotationInput.textContent = rotation + '°';
+    rotationInput.textContent = (rotation !== undefined && rotation !== null) ? rotation + '°' : '0°';
+    
+    // Ensure the styling is applied immediately
+    if (!rotationInput.style.fontSize) {
+      rotationInput.style.fontSize = '11px';
+      rotationInput.style.fontWeight = '500';
+      rotationInput.style.fontFamily = 'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+    }
   }
   
-  // Update opacity
-  const opacityInput = container.querySelector('[data-layer="100%"]');
+  // Update the new input field if it exists
+  if (container.rotationInputField) {
+    const rotation = getCurrentRotation(element);
+    container.rotationInputField.value = (rotation !== undefined && rotation !== null) ? rotation.toString() + '°' : '0°';
+  }
   if (opacityInput) {
-    const opacity = Math.round(parseFloat(style.opacity) * 100);
-    opacityInput.textContent = opacity + '%';
+    const opacity = style.opacity ? Math.round(parseFloat(style.opacity) * 100) : '';
+    opacityInput.textContent = opacity !== '' ? opacity + '%' : '';
   }
-  
-  // Update border radius
-  const radiusInput = container.querySelector('[data-layer="0"]');
   if (radiusInput) {
-    const radius = parseInt(style.borderRadius) || 0;
-    radiusInput.textContent = radius;
+    const radius = style.borderRadius ? parseInt(style.borderRadius) : '';
+    radiusInput.textContent = radius !== '' ? radius : '';
   }
-  
+
+  // Alignment (highlight the active button)
+  [alignLeft, alignCenter, alignRight, alignTop, alignMiddle, alignBottom].forEach(btn => {
+    if (btn) {
+      btn.style.outline = '';
+      btn.style.background = '#F5F5F5'; // Reset to default
+    }
+  });
+  if (style.textAlign && alignLeft && style.textAlign === 'left') {
+    alignLeft.style.outline = '2px solid #0077EE';
+    alignLeft.style.background = '#CAD5E2';
+  }
+  if (style.textAlign && alignCenter && style.textAlign === 'center') {
+    alignCenter.style.outline = '2px solid #0077EE';
+    alignCenter.style.background = '#CAD5E2';
+  }
+  if (style.textAlign && alignRight && style.textAlign === 'right') {
+    alignRight.style.outline = '2px solid #0077EE';
+    alignRight.style.background = '#CAD5E2';
+  }
+  if (style.verticalAlign && alignTop && style.verticalAlign === 'top') {
+    alignTop.style.outline = '2px solid #0077EE';
+    alignTop.style.background = '#CAD5E2';
+  }
+  if (style.verticalAlign && alignMiddle && style.verticalAlign === 'middle') {
+    alignMiddle.style.outline = '2px solid #0077EE';
+    alignMiddle.style.background = '#CAD5E2';
+  }
+  if (style.verticalAlign && alignBottom && style.verticalAlign === 'bottom') {
+    alignBottom.style.outline = '2px solid #0077EE';
+    alignBottom.style.background = '#CAD5E2';
+  }
+
   // Update individual corner inputs if they exist
   const cornerInputs = container.querySelectorAll('.corner-input');
   if (cornerInputs.length > 0) {
     updateIndividualCornerValues(container, element);
   }
-  
+
   // Update Fill Controls
   updateFillControls(container, element, style);
-  
   // Update Stroke Controls
   updateStrokeControls(container, element, style);
+  
+  // Fix rotation input container styling
+  fixRotationInputContainer(container);
 }
 
 // Helper function to get current rotation
 function getCurrentRotation(element) {
   const transform = element.style.transform || '';
   const match = transform.match(/rotate\(([^)]+)deg\)/);
-  return match ? parseInt(match[1]) : 0;
+  if (match) {
+    const rotation = parseFloat(match[1]);
+    // Normalize rotation to 0-360 range
+    return ((rotation % 360) + 360) % 360;
+  }
+  return 0;
+}
+
+// Fix rotation input container to properly hug text content
+function fixRotationInputContainer(container) {
+  const rotationInput = container.querySelector('[data-layer="0°"]');
+  const inputContainer = container.querySelector('.Input');
+  const containerDiv = container.querySelector('.Container');
+  
+  if (rotationInput && inputContainer && containerDiv) {
+    // Apply professional input styling
+    inputContainer.style.cssText = `
+      width: 100%;
+      max-width: 120px;
+      position: relative;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+    `;
+    
+    containerDiv.style.cssText = `
+      width: 100%;
+      position: relative;
+      display: flex;
+      align-items: center;
+    `;
+    
+    // Create a proper input field experience
+    rotationInput.style.cssText = `
+      width: 100%;
+      height: 32px;
+      padding: 0 12px;
+      border: 1px solid #E0E0E0;
+      border-radius: 4px;
+      background-color: #FFFFFF;
+      color: #333333;
+      font-size: 11px;
+      font-weight: 500;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+      box-sizing: border-box;
+      outline: none;
+      transition: all 0.2s ease;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      white-space: nowrap;
+      overflow: hidden;
+    `;
+    
+    // Add hover effect
+    rotationInput.addEventListener('mouseenter', () => {
+      rotationInput.style.borderColor = '#CCCCCC';
+      rotationInput.style.backgroundColor = '#FAFAFA';
+    });
+    
+    rotationInput.addEventListener('mouseleave', () => {
+      if (!rotationInput.matches(':focus')) {
+        rotationInput.style.borderColor = '#E0E0E0';
+        rotationInput.style.backgroundColor = '#FFFFFF';
+      }
+    });
+    
+    // Add focus effect
+    rotationInput.addEventListener('focus', () => {
+      rotationInput.style.borderColor = '#0077EE';
+      rotationInput.style.boxShadow = '0 0 0 3px rgba(0, 119, 238, 0.1)';
+      rotationInput.style.backgroundColor = '#FFFFFF';
+    });
+    
+    rotationInput.addEventListener('blur', () => {
+      rotationInput.style.borderColor = '#E0E0E0';
+      rotationInput.style.boxShadow = 'none';
+      rotationInput.style.backgroundColor = '#FFFFFF';
+    });
+    
+    // Ensure it's properly editable
+    rotationInput.contentEditable = true;
+    rotationInput.spellcheck = false;
+    rotationInput.setAttribute('role', 'textbox');
+    rotationInput.setAttribute('aria-label', 'Rotation value in degrees');
+  }
 }
 
 // Fallback UI if HTML loading fails
@@ -914,6 +1272,18 @@ function updateFillControls(container, element, style) {
   // Update Fill Color Swatch and Value
   const fillColorSwatch = container.querySelector('.FillColorSwatch');
   const fillColorValue = container.querySelector('.FillColorValue');
+  
+  if (!element || !style) {
+    // Clear fill controls when no element is selected
+    if (fillColorSwatch) {
+      fillColorSwatch.style.background = '#FFFFFF';
+    }
+    if (fillColorValue) {
+      fillColorValue.textContent = '';
+    }
+    return;
+  }
+  
   const backgroundColor = style.backgroundColor;
   
   if (fillColorSwatch && fillColorValue) {
@@ -941,6 +1311,30 @@ function updateStrokeControls(container, element, style) {
   // Update Stroke Color Swatch and Value
   const strokeColorSwatch = container.querySelector('.StrokeColorSwatch');
   const strokeColorValue = container.querySelector('.StrokeColorValue');
+  
+  if (!element || !style) {
+    // Clear stroke controls when no element is selected
+    if (strokeColorSwatch) {
+      strokeColorSwatch.style.background = '#000000';
+    }
+    if (strokeColorValue) {
+      strokeColorValue.textContent = '';
+    }
+    
+    // Clear stroke width
+    const strokeWidthValue = container.querySelector('.StrokeWidthValue');
+    if (strokeWidthValue) {
+      strokeWidthValue.textContent = '';
+    }
+    
+    // Clear stroke opacity
+    const strokeOpacityValue = container.querySelector('.StrokeOpacityValue');
+    if (strokeOpacityValue) {
+      strokeOpacityValue.textContent = '';
+    }
+    return;
+  }
+  
   const borderColor = style.borderColor;
   
   if (strokeColorSwatch && strokeColorValue) {
