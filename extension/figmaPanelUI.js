@@ -46,6 +46,93 @@ async function loadFigmaPanelHTML(sidebar, { getSelectedEl, onStyleEdit }) {
 // Wire up all event handlers for the HTML UI
 function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
   
+  // Create reusable input field component
+  function createInputField(options = {}) {
+    const {
+      value = '',
+      suffix = '',
+      property = '',
+      logPrefix = '',
+      validation = /[^\d.-]/g,
+      onInput = null
+    } = options;
+    
+    const inputField = document.createElement('input');
+    inputField.type = 'text';
+    inputField.value = value + suffix;
+    inputField.style.cssText = `
+      width: auto;
+      height: 14px;
+      padding: 0px 4px;
+      border: none;
+      background-color: transparent;
+      outline: none;
+      font-size: 11px;
+      font-family: Inter;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.9);
+      transition: all 0.2s ease;
+    `;
+    
+    // Add hover and focus effects
+    inputField.addEventListener('mouseenter', () => {
+      inputField.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
+    });
+    
+    inputField.addEventListener('mouseleave', () => {
+      if (!inputField.matches(':focus')) {
+        inputField.style.backgroundColor = 'transparent';
+      }
+    });
+    
+    inputField.addEventListener('focus', () => {
+      inputField.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
+      inputField.style.outline = '1px solid #0077EE';
+      inputField.select();
+    });
+    
+    inputField.addEventListener('blur', () => {
+      inputField.style.backgroundColor = 'transparent';
+      inputField.style.outline = 'none';
+      
+      // Ensure suffix is present
+      if (suffix && !inputField.value.includes(suffix)) {
+        inputField.value = inputField.value + suffix;
+      }
+    });
+    
+    // Handle input changes
+    inputField.addEventListener('input', (e) => {
+      console.log(`${logPrefix} input changed`);
+      const el = getSelectedEl();
+      if (el) {
+        const cleanValue = e.target.value.replace(validation, '');
+        console.log(`📍 Element: ${el.tagName}${el.id ? '#' + el.id : ''}${el.className ? '.' + el.className.split(' ').join('.') : ''}`);
+        console.log(`${logPrefix}: ${cleanValue}${suffix}`);
+        
+        if (onInput) {
+          onInput(cleanValue, el);
+        } else if (property) {
+          onStyleEdit(property, cleanValue + (suffix === '°' ? 'deg' : suffix));
+        }
+        
+        if (window.logToConsolePanel) {
+          window.logToConsolePanel(`${logPrefix}: ${cleanValue}${suffix}`, 'info');
+        }
+      }
+    });
+    
+    // Handle Enter key to commit changes
+    inputField.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        inputField.blur();
+      }
+    });
+    
+    return inputField;
+  }
+  
   // Position alignment buttons - Horizontal alignment
   const horizontalAlignButtons = {
     'ButtonAlignLeft': () => onStyleEdit('textAlign', 'left'),
@@ -66,11 +153,22 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
     if (button) {
       button.style.cursor = 'pointer';
       button.addEventListener('click', () => {
-        handler();
-        // Update UI to reflect the change
+        console.log(`🎯 Position Panel: ${className} button clicked`);
         const el = getSelectedEl();
         if (el) {
+          console.log(`📍 Element: ${el.tagName}${el.id ? '#' + el.id : ''}${el.className ? '.' + el.className.split(' ').join('.') : ''}`);
+          console.log(`🎨 Applying: ${className} alignment`);
+        }
+        
+        handler();
+        
+        // Update UI to reflect the change
+        if (el) {
           updateUIFromSelectedElement(container, el);
+        }
+        
+        if (window.logToConsolePanel) {
+          window.logToConsolePanel(`🎯 Applied ${className} alignment`, 'success');
         }
       });
       
@@ -90,11 +188,22 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
     if (button) {
       button.style.cursor = 'pointer';
       button.addEventListener('click', () => {
-        handler();
-        // Update UI to reflect the change
+        console.log(`🎯 Position Panel: ${className} button clicked`);
         const el = getSelectedEl();
         if (el) {
+          console.log(`📍 Element: ${el.tagName}${el.id ? '#' + el.id : ''}${el.className ? '.' + el.className.split(' ').join('.') : ''}`);
+          console.log(`🎨 Applying: ${className} alignment`);
+        }
+        
+        handler();
+        
+        // Update UI to reflect the change
+        if (el) {
           updateUIFromSelectedElement(container, el);
+        }
+        
+        if (window.logToConsolePanel) {
+          window.logToConsolePanel(`🎯 Applied ${className} alignment`, 'success');
         }
       });
       
@@ -108,172 +217,105 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
     }
   });
   
-  // Wire up X/Y position inputs
-  const xInput = container.querySelector('[data-layer="32464"]');
-  const yInput = container.querySelector('[data-layer="20162"]');
+  // Wire up X/Y position inputs with proper input fields
+  const xInput = container.querySelector('[data-layer="-32464"]');
+  const yInput = container.querySelector('[data-layer="-20162"]');
+  
+  console.log('🔍 Looking for input elements:');
+  console.log('X Input found:', !!xInput);
+  console.log('Y Input found:', !!yInput);
   
   if (xInput) {
-    xInput.contentEditable = true;
-    xInput.addEventListener('input', (e) => {
-      const el = getSelectedEl();
-      if (el) {
-        const value = e.target.textContent.replace(/[^\d.-]/g, '');
-        onStyleEdit('left', value + 'px');
-      }
+    const xInputField = createInputField({
+      value: '0',
+      suffix: '',
+      property: 'left',
+      logPrefix: '📍 Position Panel: X position',
+      validation: /[^\d.-]/g,
+      onInput: (value, el) => onStyleEdit('left', value + 'px')
     });
     
-    // Handle Enter key to commit changes
-    xInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        xInput.blur();
-      }
-    });
+    // Copy the original element's positioning and styling
+    const originalStyle = window.getComputedStyle(xInput);
+    xInputField.style.position = originalStyle.position;
+    xInputField.style.left = originalStyle.left;
+    xInputField.style.top = originalStyle.top;
+    xInputField.style.width = originalStyle.width;
+    xInputField.style.height = originalStyle.height;
+    xInputField.style.justifyContent = originalStyle.justifyContent;
+    xInputField.style.display = originalStyle.display;
+    xInputField.style.flexDirection = originalStyle.flexDirection;
+    xInputField.style.letterSpacing = originalStyle.letterSpacing;
+    xInputField.style.overflowWrap = originalStyle.overflowWrap;
+    
+    // Replace the contentEditable div with the input
+    xInput.parentNode.replaceChild(xInputField, xInput);
+    
+    // Store reference for updates
+    container.xInputField = xInputField;
   }
   
   if (yInput) {
-    yInput.contentEditable = true;
-    yInput.addEventListener('input', (e) => {
-      const el = getSelectedEl();
-      if (el) {
-        const value = e.target.textContent.replace(/[^\d.-]/g, '');
-        onStyleEdit('top', value + 'px');
-      }
+    const yInputField = createInputField({
+      value: '0',
+      suffix: '',
+      property: 'top',
+      logPrefix: '📍 Position Panel: Y position',
+      validation: /[^\d.-]/g,
+      onInput: (value, el) => onStyleEdit('top', value + 'px')
     });
     
-    // Handle Enter key to commit changes
-    yInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        yInput.blur();
-      }
-    });
-  }
-  
-  // Wire up rotation input with proper input field approach
-  const rotationInput = container.querySelector('[data-layer="0°"]');
-  if (rotationInput) {
-    // Create a proper input field by replacing the contentEditable div
-    const inputField = document.createElement('input');
-    inputField.type = 'text';
-    inputField.value = '0°';
-    inputField.style.cssText = `
-      width: auto;
-      height: 14px;
-      left: 0px;
-      top: 0px;
-      position: relative;
-      justify-content: center;
-      display: flex;
-      flex-direction: column;
-      color: rgba(0, 0, 0, 0.9);
-      font-size: 11px;
-      font-family: Inter;
-      font-weight: 500;
-      letter-spacing: 0.05px;
-      overflow-wrap: break-word;
-      min-width: 12px;
-      max-width: 80px;
-      padding: 0px 4px;
-      box-sizing: border-box;
-      overflow: visible;
-      border: none;
-      background-color: transparent;
-      outline: none;
-      transition: all 0.2s ease;
-    `;
+    // Copy the original element's positioning and styling
+    const originalStyle = window.getComputedStyle(yInput);
+    yInputField.style.position = originalStyle.position;
+    yInputField.style.left = originalStyle.left;
+    yInputField.style.top = originalStyle.top;
+    yInputField.style.width = originalStyle.width;
+    yInputField.style.height = originalStyle.height;
+    yInputField.style.justifyContent = originalStyle.justifyContent;
+    yInputField.style.display = originalStyle.display;
+    yInputField.style.flexDirection = originalStyle.flexDirection;
+    yInputField.style.letterSpacing = originalStyle.letterSpacing;
+    yInputField.style.overflowWrap = originalStyle.overflowWrap;
     
     // Replace the contentEditable div with the input
-    rotationInput.parentNode.replaceChild(inputField, rotationInput);
+    yInput.parentNode.replaceChild(yInputField, yInput);
     
-    // Add hover and focus effects
-    inputField.addEventListener('mouseenter', () => {
-      inputField.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
+    // Store reference for updates
+    container.yInputField = yInputField;
+  }
+  
+  // Wire up rotation input with proper input field
+  const rotationInput = container.querySelector('[data-layer="0°"]');
+  console.log('Rotation Input found:', !!rotationInput);
+  if (rotationInput) {
+    const rotationInputField = createInputField({
+      value: '0',
+      suffix: '°',
+      property: 'transform',
+      logPrefix: '🔄 Position Panel: Rotation',
+      validation: /[^\d.-]/g,
+      onInput: (value, el) => onStyleEdit('transform', `rotate(${value}deg)`)
     });
     
-    inputField.addEventListener('mouseleave', () => {
-      if (!inputField.matches(':focus')) {
-        inputField.style.backgroundColor = 'transparent';
-      }
-    });
+    // Copy the original element's positioning and styling
+    const originalStyle = window.getComputedStyle(rotationInput);
+    rotationInputField.style.position = originalStyle.position;
+    rotationInputField.style.left = originalStyle.left;
+    rotationInputField.style.top = originalStyle.top;
+    rotationInputField.style.width = originalStyle.width;
+    rotationInputField.style.height = originalStyle.height;
+    rotationInputField.style.justifyContent = originalStyle.justifyContent;
+    rotationInputField.style.display = originalStyle.display;
+    rotationInputField.style.flexDirection = originalStyle.flexDirection;
+    rotationInputField.style.letterSpacing = originalStyle.letterSpacing;
+    rotationInputField.style.overflowWrap = originalStyle.overflowWrap;
     
-    inputField.addEventListener('focus', () => {
-      inputField.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
-      inputField.style.outline = '1px solid #0077EE';
-      inputField.select(); // Select all text when focused
-    });
+    // Replace the contentEditable div with the input
+    rotationInput.parentNode.replaceChild(rotationInputField, rotationInput);
     
-    inputField.addEventListener('blur', () => {
-      inputField.style.backgroundColor = 'transparent';
-      inputField.style.outline = 'none';
-      
-      // Set default value if empty or only contains degree symbol
-      if (inputField.value === '' || inputField.value === '°' || inputField.value.replace(/[^\d.-]/g, '') === '') {
-        inputField.value = '0°';
-        const el = getSelectedEl();
-        if (el) {
-          onStyleEdit('transform', 'rotate(0deg)');
-        }
-      }
-    });
-    
-    // Handle input changes
-    inputField.addEventListener('input', (e) => {
-      const el = getSelectedEl();
-      if (el) {
-        // Remove degree symbol for processing, only allow numbers, decimal point, and minus sign
-        const cleanValue = e.target.value.replace(/[^\d.-]/g, '');
-        
-        // Update the input to show the clean value with degree symbol
-        if (cleanValue === '') {
-          e.target.value = '0°';
-          onStyleEdit('transform', 'rotate(0deg)');
-        } else {
-          e.target.value = cleanValue + '°';
-          onStyleEdit('transform', `rotate(${cleanValue}deg)`);
-        }
-      }
-    });
-    
-    // Handle keydown for validation
-    inputField.addEventListener('keydown', (e) => {
-      // Allow all navigation and editing keys
-      if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Tab', 'Enter', 'Escape'].includes(e.key)) {
-        return; // Don't prevent default for these keys
-      }
-      
-      // Allow modifier keys (Ctrl, Cmd, etc.)
-      if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) {
-        return; // Don't prevent default for modifier combinations
-      }
-      
-      // Only allow numbers, decimal point, minus sign, and degree symbol
-      if (!/[\d.-°]/.test(e.key)) {
-        e.preventDefault();
-      }
-    });
-    
-    // Handle Enter to commit
-    inputField.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        inputField.blur();
-      }
-    });
-    
-    // Handle paste event to clean input
-    inputField.addEventListener('paste', (e) => {
-      e.preventDefault();
-      const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-      const cleanValue = pastedText.replace(/[^\d.-]/g, '');
-      if (cleanValue) {
-        inputField.value = cleanValue;
-        inputField.dispatchEvent(new Event('input'));
-      }
-    });
-    
-    // Store reference to the new input field for updates
-    container.rotationInputField = inputField;
+    // Store reference for updates
+    container.rotationInputField = rotationInputField;
   }
   
   // Wire up rotation buttons
@@ -281,12 +323,19 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
   if (rotateButton) {
     rotateButton.style.cursor = 'pointer';
     rotateButton.addEventListener('click', () => {
+      console.log('🔄 Position Panel: Rotate 90° button clicked');
       const el = getSelectedEl();
       if (el) {
         const currentRotation = getCurrentRotation(el);
         const newRotation = (currentRotation + 90) % 360;
+        console.log(`📍 Element: ${el.tagName}${el.id ? '#' + el.id : ''}${el.className ? '.' + el.className.split(' ').join('.') : ''}`);
+        console.log(`🔄 Rotation: ${currentRotation}° → ${newRotation}°`);
         onStyleEdit('transform', `rotate(${newRotation}deg)`);
         updateUIFromSelectedElement(container, el);
+        
+        if (window.logToConsolePanel) {
+          window.logToConsolePanel(`🔄 Rotated element by 90° (${currentRotation}° → ${newRotation}°)`, 'success');
+        }
       }
     });
     
@@ -306,6 +355,7 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
   if (flipHorizontal) {
     flipHorizontal.style.cursor = 'pointer';
     flipHorizontal.addEventListener('click', () => {
+      console.log('🔄 Position Panel: Flip Horizontal button clicked');
       const el = getSelectedEl();
       if (el) {
         const currentTransform = el.style.transform || '';
@@ -315,13 +365,22 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
         if (hasFlipX) {
           // Remove horizontal flip
           newTransform = currentTransform.replace('scaleX(-1)', '').trim();
+          console.log('🔄 Removing horizontal flip');
         } else {
           // Add horizontal flip
           newTransform = currentTransform + ' scaleX(-1)';
+          console.log('🔄 Adding horizontal flip');
         }
+        
+        console.log(`📍 Element: ${el.tagName}${el.id ? '#' + el.id : ''}${el.className ? '.' + el.className.split(' ').join('.') : ''}`);
+        console.log(`🔄 Transform: "${currentTransform}" → "${newTransform}"`);
         
         onStyleEdit('transform', newTransform);
         updateUIFromSelectedElement(container, el);
+        
+        if (window.logToConsolePanel) {
+          window.logToConsolePanel(`🔄 ${hasFlipX ? 'Removed' : 'Applied'} horizontal flip`, 'success');
+        }
       }
     });
     
@@ -337,6 +396,7 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
   if (flipVertical) {
     flipVertical.style.cursor = 'pointer';
     flipVertical.addEventListener('click', () => {
+      console.log('🔄 Position Panel: Flip Vertical button clicked');
       const el = getSelectedEl();
       if (el) {
         const currentTransform = el.style.transform || '';
@@ -346,13 +406,22 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
         if (hasFlipY) {
           // Remove vertical flip
           newTransform = currentTransform.replace('scaleY(-1)', '').trim();
+          console.log('🔄 Removing vertical flip');
         } else {
           // Add vertical flip
           newTransform = currentTransform + ' scaleY(-1)';
+          console.log('🔄 Adding vertical flip');
         }
+        
+        console.log(`📍 Element: ${el.tagName}${el.id ? '#' + el.id : ''}${el.className ? '.' + el.className.split(' ').join('.') : ''}`);
+        console.log(`🔄 Transform: "${currentTransform}" → "${newTransform}"`);
         
         onStyleEdit('transform', newTransform);
         updateUIFromSelectedElement(container, el);
+        
+        if (window.logToConsolePanel) {
+          window.logToConsolePanel(`🔄 ${hasFlipY ? 'Removed' : 'Applied'} vertical flip`, 'success');
+        }
       }
     });
     
@@ -365,53 +434,140 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
     });
   }
   
-  // Wire up width/height inputs
+  // Wire up width/height inputs with proper input fields
   const widthInput = container.querySelector('[data-layer="1600"]');
   const heightInput = container.querySelector('[data-layer="960"]');
   
+  console.log('Width Input found:', !!widthInput);
+  console.log('Height Input found:', !!heightInput);
+  
   if (widthInput) {
-    widthInput.contentEditable = true;
-    widthInput.addEventListener('input', (e) => {
-      const el = getSelectedEl();
-      if (el) {
-        onStyleEdit('width', e.target.textContent + 'px');
-      }
+    const widthInputField = createInputField({
+      value: '0',
+      suffix: '',
+      property: 'width',
+      logPrefix: '📏 Position Panel: Width',
+      validation: /[^\d.-]/g,
+      onInput: (value, el) => onStyleEdit('width', value + 'px')
     });
+    
+    // Copy the original element's positioning and styling
+    const originalStyle = window.getComputedStyle(widthInput);
+    widthInputField.style.position = originalStyle.position;
+    widthInputField.style.left = originalStyle.left;
+    widthInputField.style.top = originalStyle.top;
+    widthInputField.style.width = originalStyle.width;
+    widthInputField.style.height = originalStyle.height;
+    widthInputField.style.justifyContent = originalStyle.justifyContent;
+    widthInputField.style.display = originalStyle.display;
+    widthInputField.style.flexDirection = originalStyle.flexDirection;
+    widthInputField.style.letterSpacing = originalStyle.letterSpacing;
+    widthInputField.style.overflowWrap = originalStyle.overflowWrap;
+    
+    // Replace the contentEditable div with the input
+    widthInput.parentNode.replaceChild(widthInputField, widthInput);
+    
+    // Store reference for updates
+    container.widthInputField = widthInputField;
   }
   
   if (heightInput) {
-    heightInput.contentEditable = true;
-    heightInput.addEventListener('input', (e) => {
-      const el = getSelectedEl();
-      if (el) {
-        onStyleEdit('height', e.target.textContent + 'px');
-      }
+    const heightInputField = createInputField({
+      value: '0',
+      suffix: '',
+      property: 'height',
+      logPrefix: '📏 Position Panel: Height',
+      validation: /[^\d.-]/g,
+      onInput: (value, el) => onStyleEdit('height', value + 'px')
     });
+    
+    // Copy the original element's positioning and styling
+    const originalStyle = window.getComputedStyle(heightInput);
+    heightInputField.style.position = originalStyle.position;
+    heightInputField.style.left = originalStyle.left;
+    heightInputField.style.top = originalStyle.top;
+    heightInputField.style.width = originalStyle.width;
+    heightInputField.style.height = originalStyle.height;
+    heightInputField.style.justifyContent = originalStyle.justifyContent;
+    heightInputField.style.display = originalStyle.display;
+    heightInputField.style.flexDirection = originalStyle.flexDirection;
+    heightInputField.style.letterSpacing = originalStyle.letterSpacing;
+    heightInputField.style.overflowWrap = originalStyle.overflowWrap;
+    
+    // Replace the contentEditable div with the input
+    heightInput.parentNode.replaceChild(heightInputField, heightInput);
+    
+    // Store reference for updates
+    container.heightInputField = heightInputField;
   }
   
-  // Wire up opacity input
+  // Wire up opacity input with proper input field
   const opacityInput = container.querySelector('[data-layer="100%"]');
+  console.log('Opacity Input found:', !!opacityInput);
   if (opacityInput) {
-    opacityInput.contentEditable = true;
-    opacityInput.addEventListener('input', (e) => {
-      const el = getSelectedEl();
-      if (el) {
-        const value = e.target.textContent.replace('%', '');
-        onStyleEdit('opacity', value / 100);
+    const opacityInputField = createInputField({
+      value: '100',
+      suffix: '%',
+      property: 'opacity',
+      logPrefix: '🎭 Position Panel: Opacity',
+      validation: /[^\d.-]/g,
+      onInput: (value, el) => {
+        const opacityValue = Math.max(0, Math.min(100, parseFloat(value) || 0)) / 100;
+        onStyleEdit('opacity', opacityValue);
       }
     });
+    
+    // Copy the original element's positioning and styling
+    const originalStyle = window.getComputedStyle(opacityInput);
+    opacityInputField.style.position = originalStyle.position;
+    opacityInputField.style.left = originalStyle.left;
+    opacityInputField.style.top = originalStyle.top;
+    opacityInputField.style.width = originalStyle.width;
+    opacityInputField.style.height = originalStyle.height;
+    opacityInputField.style.justifyContent = originalStyle.justifyContent;
+    opacityInputField.style.display = originalStyle.display;
+    opacityInputField.style.flexDirection = originalStyle.flexDirection;
+    opacityInputField.style.letterSpacing = originalStyle.letterSpacing;
+    opacityInputField.style.overflowWrap = originalStyle.overflowWrap;
+    
+    // Replace the contentEditable div with the input
+    opacityInput.parentNode.replaceChild(opacityInputField, opacityInput);
+    
+    // Store reference for updates
+    container.opacityInputField = opacityInputField;
   }
   
-  // Wire up corner radius input
+  // Wire up corner radius input with proper input field
   const radiusInput = container.querySelector('[data-layer="0"]');
+  console.log('Radius Input found:', !!radiusInput);
   if (radiusInput) {
-    radiusInput.contentEditable = true;
-    radiusInput.addEventListener('input', (e) => {
-      const el = getSelectedEl();
-      if (el) {
-        onStyleEdit('borderRadius', e.target.textContent + 'px');
-      }
+    const radiusInputField = createInputField({
+      value: '0',
+      suffix: '',
+      property: 'borderRadius',
+      logPrefix: '🔲 Position Panel: Border radius',
+      validation: /[^\d.-]/g,
+      onInput: (value, el) => onStyleEdit('borderRadius', value + 'px')
     });
+    
+    // Copy the original element's positioning and styling
+    const originalStyle = window.getComputedStyle(radiusInput);
+    radiusInputField.style.position = originalStyle.position;
+    radiusInputField.style.left = originalStyle.left;
+    radiusInputField.style.top = originalStyle.top;
+    radiusInputField.style.width = originalStyle.width;
+    radiusInputField.style.height = originalStyle.height;
+    radiusInputField.style.justifyContent = originalStyle.justifyContent;
+    radiusInputField.style.display = originalStyle.display;
+    radiusInputField.style.flexDirection = originalStyle.flexDirection;
+    radiusInputField.style.letterSpacing = originalStyle.letterSpacing;
+    radiusInputField.style.overflowWrap = originalStyle.overflowWrap;
+    
+    // Replace the contentEditable div with the input
+    radiusInput.parentNode.replaceChild(radiusInputField, radiusInput);
+    
+    // Store reference for updates
+    container.radiusInputField = radiusInputField;
   }
 
                   // Wire up individual corners button
@@ -568,18 +724,6 @@ Please generate clear, step-by-step instructions for a developer to implement th
 
 // Update UI values from selected element
 function updateUIFromSelectedElement(container, element) {
-  // X/Y position
-  const xInput = container.querySelector('[data-layer="32464"]');
-  const yInput = container.querySelector('[data-layer="20162"]');
-  // Width/height
-  const widthInput = container.querySelector('[data-layer="1600"]');
-  const heightInput = container.querySelector('[data-layer="960"]');
-  // Rotation
-  const rotationInput = container.querySelector('[data-layer="0°"]');
-  // Opacity
-  const opacityInput = container.querySelector('[data-layer="100%"]');
-  // Border radius
-  const radiusInput = container.querySelector('[data-layer="0"]');
   // Alignment
   const alignLeft = container.querySelector('.ButtonAlignLeft');
   const alignCenter = container.querySelector('.ButtonAlignHorizontalCenters');
@@ -589,13 +733,15 @@ function updateUIFromSelectedElement(container, element) {
   const alignBottom = container.querySelector('.ButtonAlignBottom');
 
   if (!element) {
-    if (xInput) xInput.textContent = '';
-    if (yInput) yInput.textContent = '';
-    if (widthInput) widthInput.textContent = '';
-    if (heightInput) heightInput.textContent = '';
-    if (rotationInput) rotationInput.textContent = '';
-    if (opacityInput) opacityInput.textContent = '';
-    if (radiusInput) radiusInput.textContent = '';
+    // Clear all input fields
+    if (container.xInputField) container.xInputField.value = '';
+    if (container.yInputField) container.yInputField.value = '';
+    if (container.widthInputField) container.widthInputField.value = '';
+    if (container.heightInputField) container.heightInputField.value = '';
+    if (container.rotationInputField) container.rotationInputField.value = '0°';
+    if (container.opacityInputField) container.opacityInputField.value = '100%';
+    if (container.radiusInputField) container.radiusInputField.value = '0';
+    
     // Remove alignment highlights
     [alignLeft, alignCenter, alignRight, alignTop, alignMiddle, alignBottom].forEach(btn => {
       if (btn) btn.style.outline = '';
@@ -609,34 +755,44 @@ function updateUIFromSelectedElement(container, element) {
   const rect = element.getBoundingClientRect();
   const style = getComputedStyle(element);
 
-  if (xInput) xInput.textContent = style.left && style.left !== 'auto' ? parseInt(style.left) : Math.round(rect.left);
-  if (yInput) yInput.textContent = style.top && style.top !== 'auto' ? parseInt(style.top) : Math.round(rect.top);
-  if (widthInput) widthInput.textContent = style.width ? parseInt(style.width) : Math.round(rect.width);
-  if (heightInput) heightInput.textContent = style.height ? parseInt(style.height) : Math.round(rect.height);
-  if (rotationInput) {
-    const rotation = getCurrentRotation(element);
-    rotationInput.textContent = (rotation !== undefined && rotation !== null) ? rotation + '°' : '0°';
-    
-    // Ensure the styling is applied immediately
-    if (!rotationInput.style.fontSize) {
-      rotationInput.style.fontSize = '11px';
-      rotationInput.style.fontWeight = '500';
-      rotationInput.style.fontFamily = 'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
-    }
+  // Update X/Y position input fields
+  if (container.xInputField) {
+    const xValue = style.left && style.left !== 'auto' ? parseInt(style.left) : Math.round(rect.left);
+    container.xInputField.value = xValue.toString();
   }
   
-  // Update the rotation input field (it's a proper input element)
+  if (container.yInputField) {
+    const yValue = style.top && style.top !== 'auto' ? parseInt(style.top) : Math.round(rect.top);
+    container.yInputField.value = yValue.toString();
+  }
+  
+  // Update width/height input fields
+  if (container.widthInputField) {
+    const widthValue = style.width ? parseInt(style.width) : Math.round(rect.width);
+    container.widthInputField.value = widthValue.toString();
+  }
+  
+  if (container.heightInputField) {
+    const heightValue = style.height ? parseInt(style.height) : Math.round(rect.height);
+    container.heightInputField.value = heightValue.toString();
+  }
+  
+  // Update rotation input field
   if (container.rotationInputField) {
     const rotation = getCurrentRotation(element);
     container.rotationInputField.value = (rotation !== undefined && rotation !== null) ? rotation.toString() + '°' : '0°';
   }
-  if (opacityInput) {
-    const opacity = style.opacity ? Math.round(parseFloat(style.opacity) * 100) : '';
-    opacityInput.textContent = opacity !== '' ? opacity + '%' : '';
+  
+  // Update opacity input field
+  if (container.opacityInputField) {
+    const opacity = style.opacity ? Math.round(parseFloat(style.opacity) * 100) : 100;
+    container.opacityInputField.value = opacity.toString() + '%';
   }
-  if (radiusInput) {
-    const radius = style.borderRadius ? parseInt(style.borderRadius) : '';
-    radiusInput.textContent = radius !== '' ? radius : '';
+  
+  // Update border radius input field
+  if (container.radiusInputField) {
+    const radius = style.borderRadius ? parseInt(style.borderRadius) : 0;
+    container.radiusInputField.value = radius.toString();
   }
 
   // Alignment (highlight the active button)

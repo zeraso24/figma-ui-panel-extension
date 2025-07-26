@@ -120,8 +120,12 @@ The sidebar panel updates reactively when:
 - **Element deselection**: Fields clear when no element is selected
 
 ### Input Field Types
-- **ContentEditable**: X/Y position, width/height, opacity, border radius
-- **Input Elements**: Rotation (with degree symbol and validation)
+- **Componentized Input Elements**: All input fields use a reusable `createInputField` component
+  - X/Y position (pixels)
+  - Width/Height (pixels) 
+  - Opacity (percentage)
+  - Border Radius (pixels)
+  - Rotation (degrees)
 - **Buttons**: Alignment controls with visual feedback
 
 ### Update Triggers
