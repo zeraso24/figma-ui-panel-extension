@@ -14,7 +14,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["overlay.js", "figmaPanelUI.js", "overlay.css", "FigmaPanel.html"],
+      "resources": ["overlay.js", "figmaPanelUI.js", "overlay.css", "Figmapanelnew.html"],
       "matches": ["<all_urls>"]
     }
   ]

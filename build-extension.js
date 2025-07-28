@@ -22,10 +22,10 @@ const cssPath = path.join(srcDir, "overlay.css");
 if (fs.existsSync(cssPath)) {
   fs.copyFileSync(cssPath, path.join(outDir, "overlay.css"));
 }
-// Copy FigmaPanel.html
-const htmlPath = path.join(srcDir, "FigmaPanel.html");
+// Copy Figmapanelnew.html
+const htmlPath = path.join(srcDir, "Figmapanelnew.html");
 if (fs.existsSync(htmlPath)) {
-  fs.copyFileSync(htmlPath, path.join(outDir, "FigmaPanel.html"));
+  fs.copyFileSync(htmlPath, path.join(outDir, "Figmapanelnew.html"));
 }
 
 // NOTE: You must ensure all shadcn/ui components are present in your extension directory
