@@ -349,6 +349,16 @@ Panel updates are triggered by:
 - **Vertical**: Top, Middle, Bottom alignment buttons
 - **Visual Feedback**: Active alignment highlighted
 
+### Auto Layout Controls
+- **Direction Buttons**: Horizontal, Vertical, Horizontal-Reverse, Vertical-Reverse layout options
+- **Active State Styling**: 
+  - Background: `#CAD5E2` (blue-gray) when active
+  - Background: `rgb(245, 245, 245)` (light gray) when inactive
+  - Cursor: Pointer for better UX
+- **Hover Effects**: Inactive buttons show light gray background (`#E0E0E0`) on hover
+- **State Management**: Only one button can be active at a time
+- **Flex Direction**: Automatically applies correct flex direction to selected elements
+
 ### Transform Controls
 - **Rotation**: 90° increment button
 - **Flip**: Horizontal and vertical flip buttons

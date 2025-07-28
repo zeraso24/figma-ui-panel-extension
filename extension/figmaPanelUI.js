@@ -374,7 +374,8 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
     widthInput.addEventListener('input', (e) => {
       const el = getSelectedEl();
       if (el) {
-        onStyleEdit('width', e.target.textContent + 'px');
+        const value = e.target.textContent.replace(/[^\d]/g, '');
+        onStyleEdit('width', value + 'px');
       }
     });
   }
@@ -384,37 +385,58 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
     heightInput.addEventListener('input', (e) => {
       const el = getSelectedEl();
       if (el) {
-        onStyleEdit('height', e.target.textContent + 'px');
+        const value = e.target.textContent.replace(/[^\d]/g, '');
+        onStyleEdit('height', value + 'px');
       }
     });
   }
 
   // Wire up auto layout direction buttons
-  const autoLayoutButtons = container.querySelectorAll('[data-layer="Background"] svg');
+  const autoLayoutButtons = container.querySelectorAll('[data-layer="Background"] .Container .Container');
+  let activeLayoutButton = null;
+  
   autoLayoutButtons.forEach((button, index) => {
-    const parent = button.closest('[data-layer="Container"]');
-    if (parent) {
-      parent.style.cursor = 'pointer';
-      parent.addEventListener('click', () => {
-        const el = getSelectedEl();
-        if (el) {
-          // Set flex direction based on button index
-          const directions = ['row', 'column', 'row-reverse', 'column-reverse'];
-          const direction = directions[index] || 'row';
-          onStyleEdit('flexDirection', direction);
-          updateUIFromSelectedElement(container, el);
-        }
-      });
+    // Set all buttons to default inactive state
+    button.style.background = 'rgb(245, 245, 245)';
+    button.style.cursor = 'pointer';
+    
+    // Add hover effects
+    button.addEventListener('mouseenter', () => {
+      if (button !== activeLayoutButton) {
+        button.style.background = '#E0E0E0';
+      }
+    });
+    
+    button.addEventListener('mouseleave', () => {
+      if (button !== activeLayoutButton) {
+        button.style.background = 'rgb(245, 245, 245)';
+      }
+    });
+    
+    // Add click functionality
+    button.addEventListener('click', () => {
+      // Remove active state from previous button
+      if (activeLayoutButton) {
+        activeLayoutButton.style.background = 'rgb(245, 245, 245)';
+      }
       
-      // Add hover effects
-      parent.addEventListener('mouseenter', () => {
-        parent.style.background = '#E0E0E0';
-      });
-      parent.addEventListener('mouseleave', () => {
-        parent.style.background = '#F5F5F5';
-      });
-    }
+      // Set active state for clicked button (using background color like other buttons)
+      button.style.background = '#CAD5E2';
+      
+      activeLayoutButton = button;
+      
+      // Apply layout direction to selected element
+      const el = getSelectedEl();
+      if (el) {
+        const directions = ['row', 'column', 'row-reverse', 'column-reverse'];
+        const direction = directions[index] || 'row';
+        onStyleEdit('flexDirection', direction);
+        updateUIFromSelectedElement(container, el);
+      }
+    });
   });
+
+
 
   // Wire up auto layout gap input
   const gapInput = container.querySelector('[data-layer="10"]');
@@ -427,6 +449,8 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
       }
     });
   }
+
+
 
   // Wire up padding inputs
   const paddingInputs = {
@@ -913,7 +937,7 @@ window.updateFigmaPanelInputs = updateInputs;
 function wireUpFillControls(container, { getSelectedEl, onStyleEdit }) {
   let fillColorPicker = null;
   
-  // Fill Color Swatch
+  // Fill Color Swatch (old structure)
   const fillColorSwatch = container.querySelector('.FillColorSwatch');
   if (fillColorSwatch) {
     console.log('🎨 Found FillColorSwatch element:', fillColorSwatch);
@@ -997,6 +1021,68 @@ function wireUpFillControls(container, { getSelectedEl, onStyleEdit }) {
       const sidebar = document.querySelector('#figma-sidebar');
       const sidebarRect = sidebar.getBoundingClientRect();
       fillColorPicker.open(sidebarRect.left - 300, sidebarRect.top + 50);
+    });
+  }
+
+  // New Fill Color Button (new structure)
+  const fillColorButton = container.querySelector('.ButtonImage[data-layer="Button - Image"]');
+  if (fillColorButton) {
+    console.log('🎨 Found new Fill Color Button:', fillColorButton);
+    fillColorButton.style.cursor = 'pointer';
+    fillColorButton.addEventListener('click', (e) => {
+      console.log('🎨 Fill Color Button clicked!');
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const el = getSelectedEl();
+      if (el) {
+        // Get current background color
+        const currentColor = window.getComputedStyle(el).backgroundColor;
+        let hexColor = '#000000';
+        
+        if (currentColor && currentColor !== 'rgba(0, 0, 0, 0)') {
+          hexColor = rgbaToHex(currentColor);
+        }
+        
+        // Create native color picker
+        const colorPicker = document.createElement('input');
+        colorPicker.type = 'color';
+        colorPicker.value = hexColor;
+        colorPicker.style.position = 'absolute';
+        colorPicker.style.left = '-9999px';
+        colorPicker.style.opacity = '0';
+        
+        document.body.appendChild(colorPicker);
+        
+        colorPicker.addEventListener('change', (e) => {
+          const color = e.target.value;
+          
+          // Update the element
+          onStyleEdit('backgroundColor', color);
+          
+          // Update the color display in the UI
+          const colorDisplay = container.querySelector('.ButtonImage[data-layer="Button → Image"]');
+          if (colorDisplay) {
+            colorDisplay.textContent = color.replace('#', '');
+          }
+          
+          // Update the color swatch
+          const colorSwatch = fillColorButton.querySelector('svg rect');
+          if (colorSwatch) {
+            colorSwatch.setAttribute('fill', color);
+          }
+          
+          document.body.removeChild(colorPicker);
+        });
+        
+        colorPicker.addEventListener('blur', () => {
+          if (document.body.contains(colorPicker)) {
+            document.body.removeChild(colorPicker);
+          }
+        });
+        
+        colorPicker.click();
+      }
     });
   }
 
@@ -1356,7 +1442,7 @@ function hexToRgba(hex, alpha) {
 
 // Update Fill Controls with current element values
 function updateFillControls(container, element, style) {
-  // Update Fill Color Swatch and Value
+  // Update Fill Color Swatch and Value (old structure)
   const fillColorSwatch = container.querySelector('.FillColorSwatch');
   const fillColorValue = container.querySelector('.FillColorValue');
   
@@ -1390,6 +1476,33 @@ function updateFillControls(container, element, style) {
   if (fillOpacityValue) {
     const opacity = Math.round(parseFloat(style.opacity) * 100);
     fillOpacityValue.textContent = `${opacity}%`;
+  }
+
+  // Update new fill structure
+  const newFillColorButton = container.querySelector('.ButtonImage[data-layer="Button - Image"]');
+  const newFillColorDisplay = container.querySelector('.ButtonImage[data-layer="Button → Image"]');
+  
+  if (newFillColorButton && newFillColorDisplay) {
+    if (backgroundColor === 'transparent' || backgroundColor === 'rgba(0, 0, 0, 0)') {
+      // Update color swatch to transparent
+      const colorSwatch = newFillColorButton.querySelector('svg rect');
+      if (colorSwatch) {
+        colorSwatch.setAttribute('fill', '#FFFFFF');
+      }
+      newFillColorDisplay.textContent = 'transparent';
+    } else {
+      // Convert rgba to hex if needed
+      const hexColor = rgbaToHex(backgroundColor);
+      
+      // Update color swatch
+      const colorSwatch = newFillColorButton.querySelector('svg rect');
+      if (colorSwatch) {
+        colorSwatch.setAttribute('fill', hexColor);
+      }
+      
+      // Update color display
+      newFillColorDisplay.textContent = hexColor.replace('#', '');
+    }
   }
 }
 
