@@ -206,7 +206,7 @@
             <div data-layer="Textbox" class="Textbox" style="flex: 1 1 0; flex-direction: column; justify-content: flex-start; align-items: flex-start; display: inline-flex">
               <div data-layer="Input" class="Input" style="align-self: stretch; height: 24px; padding: 1px; overflow: hidden; border-radius: 2px; justify-content: flex-start; align-items: center; display: inline-flex">
                 <div data-layer="Container" class="Container" style="padding-right: 7.45px; overflow: hidden; flex-direction: column; justify-content: flex-start; align-items: flex-start; display: inline-flex">
-                  <div data-layer="960" style="justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.50); font-size: 11px; font-family: Inter; font-weight: 500; letter-spacing: 0.05px; word-wrap: break-word">960</div>
+                  <div data-layer="960" style="justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.90); font-size: 11px; font-family: Inter; font-weight: 500; letter-spacing: 0.05px; word-wrap: break-word" contenteditable="true">960</div>
                 </div>
               </div>
             </div>
@@ -229,63 +229,63 @@
     <div data-layer="Container" class="Container" style="align-self: stretch; height: 64px; position: relative">
       <div data-layer="Container" class="Container" style="width: 88px; padding-top: 4px; padding-bottom: 4px; left: 16px; top: 0px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: flex-start; display: inline-flex">
         <div data-layer="Background" class="Background" style="align-self: stretch; height: 56px; position: relative; background: #F5F5F5; border-radius: 5px">
-          <div data-layer="dots" class="Dots" style="width: 86px; height: 46px; left: 1px; top: 5px; position: absolute">
-            <div data-svg-wrapper data-layer="Rectangle" class="Rectangle" style="left: 0px; top: 0px; position: absolute">
+          <div data-layer="dots" class="Dots" style="width: 86px; height: 46px; left: 1px; top: 5px; position: absolute; z-index: 1;">
+            <div data-svg-wrapper data-layer="Rectangle" class="Rectangle" style="left: 0px; top: 0px; position: absolute; cursor: pointer;" onclick="handleAlignmentClick('top-left')">
               <svg width="29" height="17" viewBox="0 0 29 17" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="0.200195" y="0.747681" width="28.66" height="15.33" fill="#CAD5E2"/>
               </svg>
             </div>
-            <div data-layer="Rectangle" class="Rectangle" style="width: 28.67px; height: 15.33px; left: 28.66px; top: 0px; position: absolute"></div>
-            <div data-layer="Rectangle" class="Rectangle" style="width: 28.66px; height: 15.33px; left: 57.33px; top: 0px; position: absolute"></div>
-            <div data-layer="Rectangle" class="Rectangle" style="width: 28.66px; height: 15.33px; left: 0px; top: 15.33px; position: absolute"></div>
-            <div data-layer="Rectangle" class="Rectangle" style="width: 28.67px; height: 15.33px; left: 28.66px; top: 15.33px; position: absolute"></div>
-            <div data-layer="Rectangle" class="Rectangle" style="width: 28.66px; height: 15.33px; left: 57.33px; top: 15.33px; position: absolute"></div>
-            <div data-layer="Rectangle" class="Rectangle" style="width: 28.66px; height: 15.33px; left: 0px; top: 30.66px; position: absolute"></div>
-            <div data-layer="Rectangle" class="Rectangle" style="width: 28.67px; height: 15.33px; left: 28.66px; top: 30.66px; position: absolute"></div>
-            <div data-layer="Rectangle" class="Rectangle" style="width: 28.66px; height: 15.33px; left: 57.33px; top: 30.66px; position: absolute"></div>
+            <div data-layer="Rectangle" class="Rectangle" style="width: 28.67px; height: 15.33px; left: 28.66px; top: 0px; position: absolute; cursor: pointer;" onclick="handleAlignmentClick('top-center')"></div>
+            <div data-layer="Rectangle" class="Rectangle" style="width: 28.66px; height: 15.33px; left: 57.33px; top: 0px; position: absolute; cursor: pointer;" onclick="handleAlignmentClick('top-right')"></div>
+            <div data-layer="Rectangle" class="Rectangle" style="width: 28.66px; height: 15.33px; left: 0px; top: 15.33px; position: absolute; cursor: pointer;" onclick="handleAlignmentClick('middle-left')"></div>
+            <div data-layer="Rectangle" class="Rectangle" style="width: 28.67px; height: 15.33px; left: 28.66px; top: 15.33px; position: absolute; cursor: pointer;" onclick="handleAlignmentClick('middle-center')"></div>
+            <div data-layer="Rectangle" class="Rectangle" style="width: 28.66px; height: 15.33px; left: 57.33px; top: 15.33px; position: absolute; cursor: pointer;" onclick="handleAlignmentClick('middle-right')"></div>
+            <div data-layer="Rectangle" class="Rectangle" style="width: 28.66px; height: 15.33px; left: 0px; top: 30.66px; position: absolute; cursor: pointer;" onclick="handleAlignmentClick('bottom-left')"></div>
+            <div data-layer="Rectangle" class="Rectangle" style="width: 28.67px; height: 15.33px; left: 28.66px; top: 30.66px; position: absolute; cursor: pointer;" onclick="handleAlignmentClick('bottom-center')"></div>
+            <div data-layer="Rectangle" class="Rectangle" style="width: 28.66px; height: 15.33px; left: 57.33px; top: 30.66px; position: absolute; cursor: pointer;" onclick="handleAlignmentClick('bottom-right')"></div>
           </div>
-          <div data-layer="container" class="Container" style="width: 86px; height: 46px; left: 1px; top: 5px; position: absolute">
-            <div data-svg-wrapper data-layer="Container" class="Container" style="left: 0px; top: 0px; position: absolute">
+          <div data-layer="container" class="Container" style="width: 86px; height: 46px; left: 1px; top: 5px; position: absolute; z-index: 2;">
+            <div data-svg-wrapper data-layer="Container" class="Container" style="left: 0px; top: 0px; position: absolute; cursor: pointer;" onclick="handleAlignmentClick('top-left')">
               <svg width="29" height="17" viewBox="0 0 29 17" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="13.5303" y="7.40765" width="2" height="2" rx="1" fill="#155DFC"/>
               </svg>
             </div>
-            <div data-svg-wrapper data-layer="Container" class="Container" style="left: 28.66px; top: 0px; position: absolute">
+            <div data-svg-wrapper data-layer="Container" class="Container" style="left: 28.66px; top: 0px; position: absolute; cursor: pointer;" onclick="handleAlignmentClick('top-center')">
               <svg width="30" height="17" viewBox="0 0 30 17" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="14.1951" y="7.40765" width="2" height="2" rx="1" fill="black" fill-opacity="0.3"/>
               </svg>
             </div>
-            <div data-svg-wrapper data-layer="Container" class="Container" style="left: 57.33px; top: 0px; position: absolute">
+            <div data-svg-wrapper data-layer="Container" class="Container" style="left: 57.33px; top: 0px; position: absolute; cursor: pointer;" onclick="handleAlignmentClick('top-right')">
               <svg width="30" height="17" viewBox="0 0 30 17" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="13.8604" y="7.40765" width="2" height="2" rx="1" fill="black" fill-opacity="0.3"/>
               </svg>
             </div>
-            <div data-svg-wrapper data-layer="Container" class="Container" style="left: 0px; top: 15.33px; position: absolute">
+            <div data-svg-wrapper data-layer="Container" class="Container" style="left: 0px; top: 15.33px; position: absolute; cursor: pointer;" onclick="handleAlignmentClick('middle-left')">
               <svg width="29" height="16" viewBox="0 0 29 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="13.5303" y="6.72772" width="2" height="2" rx="1" fill="black" fill-opacity="0.3"/>
               </svg>
             </div>
-            <div data-svg-wrapper data-layer="Container" class="Container" style="left: 28.66px; top: 15.33px; position: absolute">
+            <div data-svg-wrapper data-layer="Container" class="Container" style="left: 28.66px; top: 15.33px; position: absolute; cursor: pointer;" onclick="handleAlignmentClick('middle-center')">
               <svg width="30" height="16" viewBox="0 0 30 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="14.1951" y="6.72772" width="2" height="2" rx="1" fill="black" fill-opacity="0.3"/>
               </svg>
             </div>
-            <div data-svg-wrapper data-layer="Container" class="Container" style="left: 57.33px; top: 15.33px; position: absolute">
+            <div data-svg-wrapper data-layer="Container" class="Container" style="left: 57.33px; top: 15.33px; position: absolute; cursor: pointer;" onclick="handleAlignmentClick('middle-right')">
               <svg width="30" height="16" viewBox="0 0 30 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="13.8604" y="6.72772" width="2" height="2" rx="1" fill="black" fill-opacity="0.3"/>
               </svg>
             </div>
-            <div data-svg-wrapper data-layer="Container" class="Container" style="left: 0px; top: 30.66px; position: absolute">
+            <div data-svg-wrapper data-layer="Container" class="Container" style="left: 0px; top: 30.66px; position: absolute; cursor: pointer;" onclick="handleAlignmentClick('bottom-left')">
               <svg width="29" height="16" viewBox="0 0 29 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="13.5303" y="7.05768" width="2" height="2" rx="1" fill="black" fill-opacity="0.3"/>
               </svg>
             </div>
-            <div data-svg-wrapper data-layer="Container" class="Container" style="left: 28.66px; top: 30.66px; position: absolute">
+            <div data-svg-wrapper data-layer="Container" class="Container" style="left: 28.66px; top: 30.66px; position: absolute; cursor: pointer;" onclick="handleAlignmentClick('bottom-center')">
               <svg width="30" height="16" viewBox="0 0 30 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="14.1951" y="7.05768" width="2" height="2" rx="1" fill="black" fill-opacity="0.3"/>
               </svg>
             </div>
-            <div data-svg-wrapper data-layer="Container" class="Container" style="left: 57.33px; top: 30.66px; position: absolute">
+            <div data-svg-wrapper data-layer="Container" class="Container" style="left: 57.33px; top: 30.66px; position: absolute; cursor: pointer;" onclick="handleAlignmentClick('bottom-right')">
               <svg width="30" height="16" viewBox="0 0 30 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="13.8604" y="7.05768" width="2" height="2" rx="1" fill="black" fill-opacity="0.3"/>
               </svg>
@@ -317,7 +317,7 @@
           <div data-layer="Textbox" class="Textbox" style="flex: 1 1 0; flex-direction: column; justify-content: flex-start; align-items: flex-start; display: inline-flex">
             <div data-layer="Input" class="Input" style="align-self: stretch; height: 24px; padding: 1px; overflow: hidden; border-radius: 2px; justify-content: flex-start; align-items: center; display: inline-flex">
               <div data-layer="Container" class="Container" style="padding-right: 49.73px; overflow: hidden; flex-direction: column; justify-content: flex-start; align-items: flex-start; display: inline-flex">
-                <div data-layer="10" style="justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.90); font-size: 11px; font-family: Inter; font-weight: 500; letter-spacing: 0.05px; word-wrap: break-word">10</div>
+                <div data-layer="10" style="justify-content: center; display: flex; flex-direction: column; color: rgba(0, 0, 0, 0.90); font-size: 11px; font-family: Inter; font-weight: 500; letter-spacing: 0.05px; word-wrap: break-word" contenteditable="true">10</div>
               </div>
             </div>
           </div>

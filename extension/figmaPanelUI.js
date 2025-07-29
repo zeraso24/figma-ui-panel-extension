@@ -43,8 +43,177 @@ async function loadFigmaPanelHTML(sidebar, { getSelectedEl, onStyleEdit }) {
   }
 }
 
-// Wire up all event handlers for the HTML UI
-function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
+  // Wire up all event handlers for the HTML UI
+  function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
+    
+    // Debug function to check alignment structure
+    function debugAlignmentStructure() {
+      console.log('🔍 Debug: Checking alignment structure...');
+      
+      const backgroundRectangles = container.querySelectorAll('[data-layer="Rectangle"]');
+      console.log('🔍 Debug: Background rectangles found:', backgroundRectangles.length);
+      
+      const dotContainers = container.querySelectorAll('[data-layer="Container"]');
+      console.log('🔍 Debug: Dot containers found:', dotContainers.length);
+      
+      backgroundRectangles.forEach((rect, index) => {
+        console.log(`🔍 Debug: Background rectangle ${index}:`, {
+          element: rect,
+          hasOnClick: !!rect.onclick,
+          style: rect.style.cssText
+        });
+      });
+      
+      dotContainers.forEach((container, index) => {
+        console.log(`🔍 Debug: Dot container ${index}:`, {
+          element: container,
+          hasOnClick: !!container.onclick,
+          style: container.style.cssText,
+          hasSvg: !!container.querySelector('svg'),
+          hasRect: !!container.querySelector('rect')
+        });
+      });
+    }
+    
+    // Run debug check after a short delay
+    setTimeout(debugAlignmentStructure, 100);
+  
+  // Add alignment click handler to global scope
+  window.handleAlignmentClick = function(alignment) {
+    console.log(`🎯 Alignment Panel: ${alignment} alignment selected`);
+    console.log('🔍 Debug: handleAlignmentClick function called');
+    
+    const el = getSelectedEl();
+    if (!el) {
+      console.log('❌ No element selected for alignment');
+      return;
+    }
+    
+    console.log('✅ Element selected:', el.tagName, el.className);
+    
+    // Apply alignment based on selection
+    switch(alignment) {
+      case 'top-left':
+        onStyleEdit('textAlign', 'left');
+        onStyleEdit('verticalAlign', 'top');
+        console.log('📍 Applied: Top-Left alignment');
+        break;
+      case 'top-center':
+        onStyleEdit('textAlign', 'center');
+        onStyleEdit('verticalAlign', 'top');
+        console.log('📍 Applied: Top-Center alignment');
+        break;
+      case 'top-right':
+        onStyleEdit('textAlign', 'right');
+        onStyleEdit('verticalAlign', 'top');
+        console.log('📍 Applied: Top-Right alignment');
+        break;
+      case 'middle-left':
+        onStyleEdit('textAlign', 'left');
+        onStyleEdit('verticalAlign', 'middle');
+        console.log('📍 Applied: Middle-Left alignment');
+        break;
+      case 'middle-center':
+        onStyleEdit('textAlign', 'center');
+        onStyleEdit('verticalAlign', 'middle');
+        console.log('📍 Applied: Middle-Center alignment');
+        break;
+      case 'middle-right':
+        onStyleEdit('textAlign', 'right');
+        onStyleEdit('verticalAlign', 'middle');
+        console.log('📍 Applied: Middle-Right alignment');
+        break;
+      case 'bottom-left':
+        onStyleEdit('textAlign', 'left');
+        onStyleEdit('verticalAlign', 'bottom');
+        console.log('📍 Applied: Bottom-Left alignment');
+        break;
+      case 'bottom-center':
+        onStyleEdit('textAlign', 'center');
+        onStyleEdit('verticalAlign', 'bottom');
+        console.log('📍 Applied: Bottom-Center alignment');
+        break;
+      case 'bottom-right':
+        onStyleEdit('textAlign', 'right');
+        onStyleEdit('verticalAlign', 'bottom');
+        console.log('📍 Applied: Bottom-Right alignment');
+        break;
+      default:
+        console.log('❌ Unknown alignment:', alignment);
+    }
+    
+    console.log('🔄 Updating visual feedback for alignment:', alignment);
+    // Update visual feedback on alignment dots
+    updateAlignmentDots(container, alignment);
+    
+    // Update UI to reflect changes
+    updateUIFromSelectedElement(container, el);
+    console.log('✅ Alignment update complete');
+  };
+  
+  // Function to update alignment dots and background rectangles visual state
+  function updateAlignmentDots(container, activeAlignment) {
+    console.log('🔍 Debug: updateAlignmentDots called with alignment:', activeAlignment);
+    console.log('🔍 Debug: Container element:', container);
+    
+    // Update background rectangles (the grid squares)
+    const backgroundRectangles = container.querySelectorAll('[data-layer="Rectangle"]');
+    console.log('🔍 Debug: Found background rectangles:', backgroundRectangles.length);
+    
+    backgroundRectangles.forEach((rect, index) => {
+      console.log(`🔍 Debug: Processing background rectangle ${index}:`, rect);
+      // Reset all background rectangles to default state
+      rect.style.background = 'transparent';
+      
+      // Set active background rectangle based on alignment
+      const alignmentMap = [
+        'top-left', 'top-center', 'top-right',
+        'middle-left', 'middle-center', 'middle-right', 
+        'bottom-left', 'bottom-center', 'bottom-right'
+      ];
+      
+      if (alignmentMap[index] === activeAlignment) {
+        rect.style.background = '#155DFC';
+        console.log(`🎯 Alignment Panel: Background rectangle ${alignmentMap[index]} turned blue`);
+      }
+    });
+    
+    // Update dot containers (the clickable elements with small circles)
+    const dotContainers = container.querySelectorAll('[data-layer="Container"]');
+    console.log('🔍 Debug: Found dot containers:', dotContainers.length);
+    
+    dotContainers.forEach((container, index) => {
+      console.log(`🔍 Debug: Processing dot container ${index}:`, container);
+      const svg = container.querySelector('svg');
+      const rect = svg.querySelector('rect');
+      
+      if (!svg || !rect) {
+        console.log('❌ Debug: Missing SVG or rect in dot container:', container);
+        return;
+      }
+      
+      // Reset all dot containers to inactive state
+      container.style.background = 'rgb(245, 245, 245)';
+      rect.setAttribute('fill', 'black');
+      rect.setAttribute('fill-opacity', '0.3');
+      
+      // Set active dot container based on alignment
+      const alignmentMap = [
+        'top-left', 'top-center', 'top-right',
+        'middle-left', 'middle-center', 'middle-right', 
+        'bottom-left', 'bottom-center', 'bottom-right'
+      ];
+      
+      if (alignmentMap[index] === activeAlignment) {
+        container.style.background = '#155DFC';
+        rect.setAttribute('fill', '#FFFFFF');
+        rect.setAttribute('fill-opacity', '1');
+        console.log(`🎯 Alignment Panel: Dot container ${alignmentMap[index]} turned blue`);
+      }
+    });
+    
+    console.log('✅ Debug: updateAlignmentDots completed');
+  }
   
   // Position alignment buttons - Horizontal alignment
   const horizontalAlignButtons = {
@@ -438,14 +607,21 @@ function wireUpEventHandlers(container, { getSelectedEl, onStyleEdit }) {
 
 
 
-  // Wire up auto layout gap input
-  const gapInput = container.querySelector('[data-layer="10"]');
-  if (gapInput) {
-    gapInput.contentEditable = true;
-    gapInput.addEventListener('input', (e) => {
+  // Wire up selected element's inner gap input
+  const innerGapInput = container.querySelector('[data-layer="10"]');
+  if (innerGapInput) {
+    innerGapInput.contentEditable = true;
+    innerGapInput.addEventListener('input', (e) => {
       const el = getSelectedEl();
       if (el) {
-        onStyleEdit('gap', e.target.textContent + 'px');
+        const value = e.target.textContent.replace(/[^\d]/g, '');
+        console.log(`📏 Inner Gap Panel: Setting inner gap of selected element to ${value}px`);
+        
+        // Apply gap to the selected element only (not all elements)
+        el.style.gap = value + 'px';
+        
+        // Update UI to reflect changes
+        updateUIFromSelectedElement(container, el);
       }
     });
   }
@@ -770,10 +946,12 @@ function updateUIFromSelectedElement(container, element) {
     updateIndividualCornerValues(container, element);
   }
 
-  // Update auto layout gap
+  // Update selected element's inner gap input
   if (gapInput) {
-    const gap = style.gap ? parseInt(style.gap) : '';
-    gapInput.textContent = gap !== '' ? gap : '10';
+    // Get the gap value from the selected element's style
+    const innerGap = element.style.gap ? parseInt(element.style.gap) : '';
+    gapInput.textContent = innerGap !== '' ? innerGap : '10';
+    console.log(`📏 Inner Gap Panel: Displaying inner gap value: ${innerGap}px`);
   }
 
   // Update padding inputs
